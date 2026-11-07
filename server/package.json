@@ -6,7 +6,9 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
