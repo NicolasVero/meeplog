@@ -12,5 +12,5 @@ export const boardGameSchema = createBoardGameSchema.extend({
   createdAt: z.date(),
 });
 
-export type createBoardGameInput = z.infer<typeof createBoardGameSchema>;
+export type CreateBoardGameInput = z.infer<typeof createBoardGameSchema>;
 export type BoardGame = z.infer<typeof boardGameSchema>;

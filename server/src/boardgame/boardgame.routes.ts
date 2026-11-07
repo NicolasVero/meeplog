@@ -1,9 +1,11 @@
 import { response, Router } from 'express';
-import * as gameController from './boardgame.controller';
+import * as boardGameController from './boardgame.controller';
 
 const router = Router();
 
-router.get('/', gameController.getAllBoardGames);
-router.get('/:id', gameController.getBoardGameById);
+router.get('/', boardGameController.getAllBoardGames);
+router.get('/:id', boardGameController.getBoardGameById);
+router.post('/', boardGameController.postBoardGame);
+router.delete('/:id', boardGameController.deleteBoardGame);
 
 export default router;

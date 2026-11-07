@@ -1,5 +1,5 @@
 import prisma from '../prisma';
-import type { BoardGame } from './boardgame.schema';
+import type { BoardGame, CreateBoardGameInput } from './boardgame.schema';
 
 export async function findAllBoardGames(limit?: number): Promise<BoardGame[]> {
   const boardGames = await prisma.boardGame.findMany({
@@ -16,4 +16,18 @@ export async function findBoardGameById(id: number): Promise<BoardGame | null> {
   });
 
   return boardGame;
+}
+
+export async function createBoardGame(boardGame: CreateBoardGameInput): Promise<BoardGame> {
+  return await prisma.boardGame.create({
+    data: boardGame,
+  });
+}
+
+export async function deleteBoardGame(id: number) {
+  await prisma.boardGame.delete({
+    where: {
+      id: id,
+    },
+  });
 }
