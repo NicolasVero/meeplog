@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import * as boardGameController from './boardgame.controller';
+import * as boardGameController from './board-game.controller';
 import { validateParams, validateBody } from '../common/middlewares';
 import { idParamSchema } from '../common/schemas';
-import { createBoardGameSchema } from './boardgame.schema';
+import { createBoardGameSchema } from './board-game.schema';
 
 const router = Router();
 

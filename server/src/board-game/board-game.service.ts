@@ -1,5 +1,5 @@
 import prisma from '../prisma';
-import type { BoardGame, CreateBoardGameInput } from './boardgame.schema';
+import type { BoardGame, CreateBoardGameInput } from './board-game.schema';
 
 export async function findAllBoardGames(limit?: number): Promise<BoardGame[]> {
   const boardGames = await prisma.boardGame.findMany({

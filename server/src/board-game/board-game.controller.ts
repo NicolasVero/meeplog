@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import * as boardGameService from './boardgame.service';
+import * as boardGameService from './board-game.service';
 
 export async function getAllBoardGames(req: Request, res: Response) {
   const boardGames = await boardGameService.findAllBoardGames();
