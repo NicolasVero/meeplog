@@ -1,6 +1,4 @@
 import type { Request, Response } from 'express';
-import { z } from 'zod';
-import { createPlayerSchema } from './player.schema';
 import * as playerService from './player.service';
 
 export async function getAllPlayers(req: Request, res: Response) {
@@ -21,13 +19,7 @@ export async function getPlayerById(req: Request, res: Response) {
 }
 
 export async function postPlayer(req: Request, res: Response) {
-  const result = z.safeParse(createPlayerSchema, req.body);
-
-  if (!result.success) {
-    return res.status(400).json(result);
-  }
-
-  const player = await playerService.createPlayer(result.data);
+  const player = await playerService.createPlayer(req.body);
   return res.status(201).json(player);
 }
 

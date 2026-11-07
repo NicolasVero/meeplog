@@ -3,7 +3,7 @@ import type { BoardGame, CreateBoardGameInput } from './boardgame.schema';
 
 export async function findAllBoardGames(limit?: number): Promise<BoardGame[]> {
   const boardGames = await prisma.boardGame.findMany({
-    orderBy: [{ title: 'desc' }],
+    orderBy: [{ title: 'asc' }],
     take: limit,
   });
 

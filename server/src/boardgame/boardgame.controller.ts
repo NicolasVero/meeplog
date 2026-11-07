@@ -1,6 +1,4 @@
 import type { Request, Response } from 'express';
-import { z } from 'zod';
-import { boardGameSchema, createBoardGameSchema } from './boardgame.schema';
 import * as boardGameService from './boardgame.service';
 
 export async function getAllBoardGames(req: Request, res: Response) {
@@ -21,13 +19,7 @@ export async function getBoardGameById(req: Request, res: Response) {
 }
 
 export async function postBoardGame(req: Request, res: Response) {
-  const result = z.safeParse(createBoardGameSchema, req.body);
-
-  if (!result.success) {
-    return res.status(400).json(result);
-  }
-
-  const boardGame = await boardGameService.createBoardGame(result.data);
+  const boardGame = await boardGameService.createBoardGame(req.body);
   return res.status(201).json(boardGame);
 }
 

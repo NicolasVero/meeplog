@@ -3,7 +3,7 @@ import type { Player, CreatePlayerInput } from './player.schema';
 
 export async function findAllPlayers(limit?: number): Promise<Player[]> {
   const players = await prisma.player.findMany({
-    orderBy: [{ name: 'desc' }],
+    orderBy: [{ name: 'asc' }],
     take: limit,
   });
 
