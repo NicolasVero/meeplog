@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createPlayerSchema = z.object({
-  name: z.string(),
+  name: z.string().trim().min(1),
 });
 
 export const playerSchema = createPlayerSchema.extend({

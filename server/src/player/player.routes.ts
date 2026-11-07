@@ -1,4 +1,4 @@
-import { response, Router } from 'express';
+import { Router } from 'express';
 import * as playerController from './player.controller';
 import { validateParams, validateBody } from '../common/middlewares';
 import { idParamSchema } from '../common/schemas';
