@@ -1,10 +1,16 @@
 import prisma from '../prisma';
+import { HttpError } from '../common/errors';
+import { playInclude } from '../play/play.service';
 import type { GameNight, CreateGameNightInput } from './game-night.schema';
 
 const includePlayers = {
   players: {
     include: { player: true },
     orderBy: { player: { name: 'asc' } },
+  },
+  plays: {
+    include: playInclude,
+    orderBy: { createdAt: 'asc' },
   },
 } as const;
 
@@ -17,10 +23,11 @@ function findRawGameNightById(id: number) {
   });
 }
 
-function toGameNight({ players, ...gameNight }: GameNightWithPlayers): GameNight {
+function toGameNight({ players, plays, ...gameNight }: GameNightWithPlayers): GameNight {
   return {
     ...gameNight,
     players: players.map((p) => p.player),
+    plays: plays.map(({ boardGameId, ...play }) => play),
   };
 }
 
@@ -67,6 +74,14 @@ export async function addPlayerToGameNight(gameNightId: number, playerId: number
 }
 
 export async function removePlayerFromGameNight(gameNightId: number, playerId: number) {
+  const scoreCount = await prisma.playScore.count({
+    where: { playerId, play: { gameNightId } },
+  });
+
+  if (scoreCount > 0) {
+    throw new HttpError(409, 'Player has scores in this game night');
+  }
+
   await prisma.gameNightPlayer.delete({
     where: { gameNightId_playerId: { gameNightId, playerId } },
   });

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { playerSchema } from '../player/player.schema';
+import { playSchema } from '../play/play.schema';
 
 export const createGameNightSchema = z.object({
   date: z.coerce.date(),
@@ -23,6 +24,7 @@ export const gameNightSchema = z.object({
   notes: z.string().nullable(),
   createdAt: z.date(),
   players: z.array(playerSchema),
+  plays: z.array(playSchema),
 });
 
 export type CreateGameNightInput = z.infer<typeof createGameNightSchema>;

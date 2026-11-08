@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { ZodType } from 'zod';
 import { Prisma } from '@prisma/client';
+import { HttpError } from './errors';
 
 export function validateParams(schema: ZodType) {
   function middleware(req: Request, res: Response, next: NextFunction) {
@@ -32,6 +33,10 @@ export function validateBody(schema: ZodType) {
 export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof SyntaxError && 'body' in err) {
     return res.status(400).json({ error: 'Invalid JSON' });
+  }
+
+  if (err instanceof HttpError) {
+    return res.status(err.status).json({ error: err.message });
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
