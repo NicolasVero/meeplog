@@ -1,0 +1,113 @@
+@base = http://localhost:4000
+
+# Données du seed (npm run db:reset)
+@alice = 1
+@bob = 2
+@charlie = 3
+@intrus = 4
+@catan = 1
+@night = 1
+
+### Partie à 3
+# @name play1
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": {{catan}},
+  "scores": [
+    { "playerId": {{alice}}, "score": 10 },
+    { "playerId": {{bob}}, "score": 7 },
+    { "playerId": {{charlie}}, "score": 8 }
+  ]
+}
+
+### Partie à 2 seulement (sous-ensemble de la soirée), score négatif accepté
+# @name play2
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": {{catan}},
+  "scores": [
+    { "playerId": {{alice}}, "score": 5 },
+    { "playerId": {{bob}}, "score": -2 }
+  ]
+}
+
+### Récupérer la partie (scores triés du plus haut au plus bas)
+GET {{base}}/plays/{{play1.response.body.id}}
+
+### --- Cas d'erreur ---
+
+### Joueur hors soirée → 400
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": {{catan}},
+  "scores": [{ "playerId": {{intrus}}, "score": 3 }]
+}
+
+### Soirée inexistante → 404
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": 999999,
+  "boardGameId": {{catan}},
+  "scores": [{ "playerId": {{alice}}, "score": 3 }]
+}
+
+### Jeu inexistant → 409
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": 999999,
+  "scores": [{ "playerId": {{alice}}, "score": 3 }]
+}
+
+### Même joueur deux fois → 400
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": {{catan}},
+  "scores": [
+    { "playerId": {{alice}}, "score": 3 },
+    { "playerId": {{alice}}, "score": 4 }
+  ]
+}
+
+### Score non entier → 400
+POST {{base}}/plays
+Content-Type: application/json
+
+{
+  "gameNightId": {{night}},
+  "boardGameId": {{catan}},
+  "scores": [{ "playerId": {{alice}}, "score": 3.5 }]
+}
+
+### Aucun score → 400
+POST {{base}}/plays
+Content-Type: application/json
+
+{ "gameNightId": {{night}}, "boardGameId": {{catan}}, "scores": [] }
+
+### Partie inexistante → 404
+GET {{base}}/plays/999999
+
+### --- Nettoyage ---
+
+### Supprimer les parties → 204
+DELETE {{base}}/plays/{{play1.response.body.id}}
+
+###
+DELETE {{base}}/plays/{{play2.response.body.id}}

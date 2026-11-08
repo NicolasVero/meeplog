@@ -1,0 +1,43 @@
+@base = http://localhost:4000
+
+### Créer un jeu
+# @name catan
+POST {{base}}/board-games
+Content-Type: application/json
+
+{ "title": "Catan", "minPlayers": 3, "maxPlayers": 4, "description": "Colons et moutons" }
+
+### Créer un jeu sans description
+POST {{base}}/board-games
+Content-Type: application/json
+
+{ "title": "Azul", "minPlayers": 2, "maxPlayers": 4 }
+
+### Lister les jeux
+GET {{base}}/board-games
+
+### Récupérer le jeu créé
+GET {{base}}/board-games/{{catan.response.body.id}}
+
+### Supprimer le jeu → 204
+DELETE {{base}}/board-games/{{catan.response.body.id}}
+
+### --- Cas d'erreur ---
+
+### maxPlayers < minPlayers → 400
+POST {{base}}/board-games
+Content-Type: application/json
+
+{ "title": "Bug", "minPlayers": 4, "maxPlayers": 2 }
+
+### Champ manquant → 400
+POST {{base}}/board-games
+Content-Type: application/json
+
+{ "title": "Bug" }
+
+### Supprimer un jeu déjà joué (Catan du seed) → 409
+DELETE {{base}}/board-games/1
+
+### Jeu inexistant → 404
+GET {{base}}/board-games/999999

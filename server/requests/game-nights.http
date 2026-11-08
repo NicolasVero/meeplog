@@ -1,0 +1,75 @@
+@base = http://localhost:4000
+
+# Données du seed (npm run db:reset)
+@alice = 1
+@bob = 2
+@charlie = 3
+
+### Créer une soirée avec Alice et Bob
+# @name night
+POST {{base}}/game-nights
+Content-Type: application/json
+
+{
+  "date": "2026-11-08T20:00:00Z",
+  "location": "Chez Nico",
+  "playerIds": [{{alice}}, {{bob}}]
+}
+
+### Lister les soirées
+GET {{base}}/game-nights
+
+### Récupérer la soirée
+GET {{base}}/game-nights/{{night.response.body.id}}
+
+### Ajouter Charlie → 204
+POST {{base}}/game-nights/{{night.response.body.id}}/players/{{charlie}}
+
+### Retirer Charlie → 204
+DELETE {{base}}/game-nights/{{night.response.body.id}}/players/{{charlie}}
+
+### --- Cas d'erreur ---
+
+### Ajouter Alice une 2e fois → 409
+POST {{base}}/game-nights/{{night.response.body.id}}/players/{{alice}}
+
+### Ajouter un joueur inexistant → 409
+POST {{base}}/game-nights/{{night.response.body.id}}/players/999999
+
+### Retirer un joueur absent de la soirée → 404
+DELETE {{base}}/game-nights/{{night.response.body.id}}/players/{{charlie}}
+
+### Retirer Charlie de la soirée du seed alors qu'il a un score → 409
+DELETE {{base}}/game-nights/1/players/{{charlie}}
+
+### Soirée sans joueur → 400
+POST {{base}}/game-nights
+Content-Type: application/json
+
+{ "date": "2026-11-08T20:00:00Z", "playerIds": [] }
+
+### Joueur en double → 400
+POST {{base}}/game-nights
+Content-Type: application/json
+
+{ "date": "2026-11-08T20:00:00Z", "playerIds": [{{alice}}, {{alice}}] }
+
+### Date invalide → 400
+POST {{base}}/game-nights
+Content-Type: application/json
+
+{ "date": "pas une date", "playerIds": [{{alice}}] }
+
+### Soirée avec joueur inexistant → 409
+POST {{base}}/game-nights
+Content-Type: application/json
+
+{ "date": "2026-11-08T20:00:00Z", "playerIds": [999999] }
+
+### Soirée inexistante → 404
+GET {{base}}/game-nights/999999
+
+### --- Nettoyage ---
+
+### Supprimer la soirée → 204
+DELETE {{base}}/game-nights/{{night.response.body.id}}

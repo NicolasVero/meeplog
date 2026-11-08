@@ -1,0 +1,43 @@
+@base = http://localhost:4000
+
+### Créer un joueur
+# @name alice
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Alice" }
+
+### Lister les joueurs
+GET {{base}}/players
+
+### Récupérer le joueur créé
+GET {{base}}/players/{{alice.response.body.id}}
+
+### Supprimer le joueur → 204
+DELETE {{base}}/players/{{alice.response.body.id}}
+
+### --- Cas d'erreur ---
+
+### Nom vide → 400
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "   " }
+
+### Id invalide → 400
+GET {{base}}/players/abc
+
+### Joueur inexistant → 404
+GET {{base}}/players/999999
+
+### Supprimer un joueur présent dans une soirée (Alice du seed) → 409
+DELETE {{base}}/players/1
+
+### Suppression d'un joueur inexistant → 404
+DELETE {{base}}/players/999999
+
+### JSON malformé → 400
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Alice",

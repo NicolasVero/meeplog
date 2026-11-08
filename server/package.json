@@ -9,7 +9,9 @@
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma db push --force-reset && prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -25,5 +27,8 @@
     "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
