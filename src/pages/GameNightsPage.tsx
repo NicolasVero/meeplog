@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { NavLink, Route, Routes } from 'react-router';
 import { Link } from 'react-router';
 import { gameNightsQuery } from '../api/game-nights';
 import { QueryState } from '../components/QueryState';
@@ -18,6 +19,7 @@ export default function GameNightsPage() {
           </li>
         ))}
       </ul>
+      <NavLink to="new">Créer une soirée</NavLink>
     </section>
   );
 }
