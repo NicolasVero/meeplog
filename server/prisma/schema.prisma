@@ -17,7 +17,26 @@ model BoardGame {
 }
 
 model Player {
-  id        Int @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
+  id         Int               @id @default(autoincrement())
+  name       String
+  createdAt  DateTime          @default(now())
+  gameNights GameNightPlayer[]
+}
+
+model GameNight {
+  id        Int               @id @default(autoincrement())
+  date      DateTime
+  location  String?
+  notes     String?
+  createdAt DateTime          @default(now())
+  players   GameNightPlayer[]
+}
+
+model GameNightPlayer {
+  gameNightId Int
+  playerId    Int
+  gameNight   GameNight @relation(fields: [gameNightId], references: [id], onDelete: Cascade)
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Restrict)
+
+  @@id([gameNightId, playerId])
 }

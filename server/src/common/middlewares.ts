@@ -38,6 +38,14 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
     return res.status(404).json({ error: 'Resource not found' });
   }
 
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    return res.status(409).json({ error: 'Resource already exists' });
+  }
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+    return res.status(409).json({ error: 'Related resource missing or still referenced' });
+  }
+
   console.error(err);
   return res.status(500).json({ error: 'Internal server error' });
 }
