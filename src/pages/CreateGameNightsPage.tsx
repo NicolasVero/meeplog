@@ -7,6 +7,7 @@ import { useCreateGameNight } from '../api/game-nights';
 import { ApiError } from '../api/client';
 import type { CreateGameNightInput } from '../api/types';
 import PlayerSelectorList from '../components/PlayerSelectorList';
+import ApiErrorAlert from '../components/ApiErrorAlert';
 
 type FormValues = {
   date: string | null; // "YYYY-MM-DD"
@@ -64,33 +65,34 @@ export default function CreateGameNightsPage() {
     });
   }
 
-  const serverError = createGameNight.error;
-
   return (
     <form onSubmit={handleSubmit} noValidate>
       <Stack maw={560}>
         <Title order={1}>Nouvelle soirée</Title>
 
-        {serverError && (
-          <Alert color="red" title="La soirée n'a pas pu être créée">
-            {serverError.message}
-            {serverError instanceof ApiError && serverError.details && (
-              <ul>
-                {serverError.details.map((d) => (
-                  <li key={d.path}>
-                    {d.path} : {d.message}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Alert>
-        )}
+        <ApiErrorAlert error={createGameNight.error} title="La soirée n'a pas pu être créée" />
 
-        <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" value={values.date} onChange={(date) => update('date', date)} error={errors.date} />
-
-        <TextInput label="Lieu" placeholder="Chez Paul" value={values.location} onChange={(e) => update('location', e.currentTarget.value)} />
-
-        <Textarea label="Notes" autosize minRows={2} value={values.notes} onChange={(e) => update('notes', e.currentTarget.value)} />
+        <DateInput
+          label="Date"
+          withAsterisk
+          valueFormat="DD/MM/YYYY"
+          value={values.date}
+          onChange={(date) => update('date', date)}
+          error={errors.date}
+        />
+        <TextInput
+          label="Lieu"
+          placeholder="Chez Paul"
+          value={values.location}
+          onChange={(e) => update('location', e.currentTarget.value)}
+        />
+        <Textarea
+          label="Notes"
+          autosize
+          minRows={2}
+          value={values.notes}
+          onChange={(e) => update('notes', e.currentTarget.value)}
+        />
 
         <PlayerSelectorList value={values.playerIds} onChange={(ids) => update('playerIds', ids)} error={errors.playerIds} />
 

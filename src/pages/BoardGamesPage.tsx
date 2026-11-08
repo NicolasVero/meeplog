@@ -12,7 +12,7 @@ export default function BoardGamesPage() {
       <ul>
         {query.data?.map((game) => (
           <li key={game.id}>
-            {game.title} ({game.minPlayers}–{game.maxPlayers} joueurs)
+            {game.title} ({game.minPlayers}-{game.maxPlayers} joueurs)
           </li>
         ))}
       </ul>
