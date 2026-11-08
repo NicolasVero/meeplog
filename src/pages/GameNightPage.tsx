@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
+import { Button, Group, Text, Title } from '@mantine/core';
 import { gameNightQuery } from '../api/game-nights';
 import { QueryState } from '../components/QueryState';
 
@@ -13,7 +14,14 @@ export default function GameNightPage() {
       <QueryState query={query} />
       {night && (
         <>
-          <h1>Soirée du {new Date(night.date).toLocaleDateString()}</h1>
+          <Group justify="space-between" align="center">
+            <Title order={1}>Soirée du {new Date(night.date).toLocaleDateString()}</Title>
+            <Button component={Link} to="edit" variant="light">
+              Modifier
+            </Button>
+          </Group>
+          {night.location && <Text>Lieu : {night.location}</Text>}
+          {night.notes && <Text c="dimmed">{night.notes}</Text>}
           <p>Joueurs : {night.players.map((p) => p.name).join(', ')}</p>
           <ul>
             {night.plays.map((play) => (

@@ -3,6 +3,7 @@ import { NavLink, Route, Routes } from 'react-router';
 import GameNightsPage from './pages/GameNightsPage';
 import CreateGameNightsPage from './pages/CreateGameNightsPage';
 import GameNightPage from './pages/GameNightPage';
+import EditGameNightPage from './pages/EditGameNightPage';
 import BoardGamesPage from './pages/BoardGamesPage';
 import PlayersPage from './pages/PlayersPage';
 import classes from './App.module.css';
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="game-nights" element={<GameNightsPage />} />
             <Route path="game-nights/new" element={<CreateGameNightsPage />} />
             <Route path="game-nights/:id" element={<GameNightPage />} />
+            <Route path="game-nights/:id/edit" element={<EditGameNightPage />} />
             <Route path="board-games" element={<BoardGamesPage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="*" element={<p>Page introuvable.</p>} />

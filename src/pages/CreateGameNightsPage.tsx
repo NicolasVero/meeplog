@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Alert, Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
+import { Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useCreateGameNight } from '../api/game-nights';
-import { ApiError } from '../api/client';
 import type { CreateGameNightInput } from '../api/types';
 import PlayerSelectorList from '../components/PlayerSelectorList';
 import ApiErrorAlert from '../components/ApiErrorAlert';
