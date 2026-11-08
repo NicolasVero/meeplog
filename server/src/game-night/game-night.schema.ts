@@ -30,6 +30,11 @@ export const gameNightSchema = z.object({
   plays: z.array(playSchema),
 });
 
+export const gameNightSummarySchema = gameNightSchema.omit({ plays: true }).extend({
+  playCount: z.number(),
+});
+
 export type CreateGameNightInput = z.infer<typeof createGameNightSchema>;
 export type GameNight = z.infer<typeof gameNightSchema>;
+export type GameNightSummary = z.infer<typeof gameNightSummarySchema>;
 export type UpdateGameNightInput = z.infer<typeof updateGameNightSchema>;

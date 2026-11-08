@@ -1,7 +1,7 @@
 import prisma from '../prisma';
 import { HttpError } from '../common/errors';
 import { playInclude } from '../play/play.service';
-import type { GameNight, CreateGameNightInput, UpdateGameNightInput } from './game-night.schema';
+import type { GameNight, GameNightSummary, CreateGameNightInput, UpdateGameNightInput } from './game-night.schema';
 
 const includePlayers = {
   players: {
@@ -31,14 +31,21 @@ function toGameNight({ players, plays, ...gameNight }: GameNightWithPlayers): Ga
   };
 }
 
-export async function findAllGameNights(limit?: number): Promise<GameNight[]> {
+export async function findAllGameNights(limit?: number): Promise<GameNightSummary[]> {
   const gameNights = await prisma.gameNight.findMany({
     orderBy: [{ date: 'desc' }],
     take: limit,
-    include: includePlayers,
+    include: {
+      players: includePlayers.players,
+      _count: { select: { plays: true } },
+    },
   });
 
-  return gameNights.map(toGameNight);
+  return gameNights.map(({ players, _count, ...gameNight }) => ({
+    ...gameNight,
+    players: players.map((p) => p.player),
+    playCount: _count.plays,
+  }));
 }
 
 export async function findGameNightById(id: number): Promise<GameNight | null> {

@@ -1,13 +1,20 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { ZodType } from 'zod';
+import type { ZodError, ZodType } from 'zod';
 import { Prisma } from '@prisma/client';
 import { HttpError } from './errors';
+
+function formatIssues(error: ZodError) {
+  return error.issues.map((issue) => ({
+    path: issue.path.join('.'),
+    message: issue.message,
+  }));
+}
 
 export function validateParams(schema: ZodType) {
   function middleware(req: Request, res: Response, next: NextFunction) {
     const result = schema.safeParse(req.params);
     if (!result.success) {
-      return res.status(400).json({ error: 'Invalid params' });
+      return res.status(400).json({ error: 'Invalid params', details: formatIssues(result.error) });
     }
 
     next();
@@ -20,7 +27,7 @@ export function validateBody(schema: ZodType) {
   function middleware(req: Request, res: Response, next: NextFunction) {
     const result = schema.safeParse(req.body);
     if (!result.success) {
-      return res.status(400).json({ error: 'Invalid body' });
+      return res.status(400).json({ error: 'Invalid body', details: formatIssues(result.error) });
     }
 
     req.body = result.data;
