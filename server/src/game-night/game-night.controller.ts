@@ -23,6 +23,13 @@ export async function postGameNight(req: Request, res: Response) {
   return res.status(201).json(gameNight);
 }
 
+export async function patchGameNight(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const gameNight = await gameNightService.updateGameNight(id, req.body);
+
+  return res.json(gameNight);
+}
+
 export async function deleteGameNight(req: Request, res: Response) {
   const id = Number(req.params.id);
 

@@ -19,6 +19,24 @@ GET {{base}}/board-games
 ### Récupérer le jeu créé
 GET {{base}}/board-games/{{catan.response.body.id}}
 
+### Modifier seulement le nombre max de joueurs
+PATCH {{base}}/board-games/{{catan.response.body.id}}
+Content-Type: application/json
+
+{ "maxPlayers": 6 }
+
+### Effacer la description
+PATCH {{base}}/board-games/{{catan.response.body.id}}
+Content-Type: application/json
+
+{ "description": null }
+
+### PATCH minPlayers au-dessus du maxPlayers existant (6) → 400
+PATCH {{base}}/board-games/{{catan.response.body.id}}
+Content-Type: application/json
+
+{ "minPlayers": 7 }
+
 ### Supprimer le jeu → 204
 DELETE {{base}}/board-games/{{catan.response.body.id}}
 

@@ -29,3 +29,10 @@ export async function deletePlayer(req: Request, res: Response) {
   await playerService.deletePlayer(id);
   return res.sendStatus(204);
 }
+
+export async function patchPlayer(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const player = await playerService.updatePlayer(id, req.body);
+
+  return res.json(player);
+}

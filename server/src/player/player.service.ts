@@ -1,5 +1,5 @@
 import prisma from '../prisma';
-import type { Player, CreatePlayerInput } from './player.schema';
+import type { Player, CreatePlayerInput, UpdatePlayerInput } from './player.schema';
 
 export async function findAllPlayers(limit?: number): Promise<Player[]> {
   const players = await prisma.player.findMany({
@@ -29,5 +29,12 @@ export async function deletePlayer(id: number) {
     where: {
       id: id,
     },
+  });
+}
+
+export async function updatePlayer(id: number, data: UpdatePlayerInput): Promise<Player> {
+  return await prisma.player.update({
+    where: { id },
+    data,
   });
 }

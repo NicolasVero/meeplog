@@ -29,3 +29,10 @@ export async function deleteBoardGame(req: Request, res: Response) {
   await boardGameService.deleteBoardGame(id);
   return res.sendStatus(204);
 }
+
+export async function patchBoardGame(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const boardGame = await boardGameService.updateBoardGame(id, req.body);
+
+  return res.json(boardGame);
+}

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { nonEmpty } from '../common/schemas';
 
 const boardGameBaseSchema = z.object({
   title: z.string().trim().min(1),
@@ -12,6 +13,8 @@ export const createBoardGameSchema = boardGameBaseSchema.refine((data) => data.m
   path: ['maxPlayers'],
 });
 
+export const updateBoardGameSchema = nonEmpty(boardGameBaseSchema.partial());
+
 export const boardGameSchema = boardGameBaseSchema.extend({
   id: z.number(),
   createdAt: z.date(),
@@ -20,3 +23,4 @@ export const boardGameSchema = boardGameBaseSchema.extend({
 
 export type CreateBoardGameInput = z.infer<typeof boardGameBaseSchema>;
 export type BoardGame = z.infer<typeof boardGameSchema>;
+export type UpdateBoardGameInput = z.infer<typeof updateBoardGameSchema>;

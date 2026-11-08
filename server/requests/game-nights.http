@@ -22,6 +22,18 @@ GET {{base}}/game-nights
 ### Récupérer la soirée
 GET {{base}}/game-nights/{{night.response.body.id}}
 
+### Modifier le lieu et les notes
+PATCH {{base}}/game-nights/{{night.response.body.id}}
+Content-Type: application/json
+
+{ "location": "Chez Alice", "notes": "Pizza" }
+
+### Effacer le lieu
+PATCH {{base}}/game-nights/{{night.response.body.id}}
+Content-Type: application/json
+
+{ "location": null }
+
 ### Ajouter Charlie → 204
 POST {{base}}/game-nights/{{night.response.body.id}}/players/{{charlie}}
 
@@ -65,6 +77,18 @@ POST {{base}}/game-nights
 Content-Type: application/json
 
 { "date": "2026-11-08T20:00:00Z", "playerIds": [999999] }
+
+### PATCH avec date invalide → 400
+PATCH {{base}}/game-nights/{{night.response.body.id}}
+Content-Type: application/json
+
+{ "date": "pas une date" }
+
+### PATCH d'une soirée inexistante → 404
+PATCH {{base}}/game-nights/999999
+Content-Type: application/json
+
+{ "notes": "x" }
 
 ### Soirée inexistante → 404
 GET {{base}}/game-nights/999999

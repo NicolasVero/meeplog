@@ -17,6 +17,13 @@ export async function postPlay(req: Request, res: Response) {
   return res.status(201).json(play);
 }
 
+export async function patchPlay(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const play = await playService.updatePlay(id, req.body);
+
+  return res.json(play);
+}
+
 export async function deletePlay(req: Request, res: Response) {
   const id = Number(req.params.id);
 

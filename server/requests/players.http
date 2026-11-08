@@ -13,6 +13,12 @@ GET {{base}}/players
 ### Récupérer le joueur créé
 GET {{base}}/players/{{alice.response.body.id}}
 
+### Renommer le joueur
+PATCH {{base}}/players/{{alice.response.body.id}}
+Content-Type: application/json
+
+{ "name": "Alicia" }
+
 ### Supprimer le joueur → 204
 DELETE {{base}}/players/{{alice.response.body.id}}
 
@@ -23,6 +29,18 @@ POST {{base}}/players
 Content-Type: application/json
 
 { "name": "   " }
+
+### PATCH sans aucun champ → 400
+PATCH {{base}}/players/1
+Content-Type: application/json
+
+{}
+
+### PATCH d'un joueur inexistant → 404
+PATCH {{base}}/players/999999
+Content-Type: application/json
+
+{ "name": "Personne" }
 
 ### Id invalide → 400
 GET {{base}}/players/abc

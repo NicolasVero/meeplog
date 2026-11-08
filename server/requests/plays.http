@@ -40,7 +40,48 @@ Content-Type: application/json
 ### Récupérer la partie (scores triés du plus haut au plus bas)
 GET {{base}}/plays/{{play1.response.body.id}}
 
+### Changer le jeu de la partie
+PATCH {{base}}/plays/{{play1.response.body.id}}
+Content-Type: application/json
+
+{ "boardGameId": 2 }
+
+### Remplacer tous les scores (Charlie n'a plus de score)
+PATCH {{base}}/plays/{{play1.response.body.id}}
+Content-Type: application/json
+
+{
+  "scores": [
+    { "playerId": {{alice}}, "score": 12 },
+    { "playerId": {{bob}}, "score": 15 }
+  ]
+}
+
 ### --- Cas d'erreur ---
+
+### PATCH avec joueur hors soirée → 400
+PATCH {{base}}/plays/{{play1.response.body.id}}
+Content-Type: application/json
+
+{ "scores": [{ "playerId": {{intrus}}, "score": 3 }] }
+
+### PATCH avec jeu inexistant → 409
+PATCH {{base}}/plays/{{play1.response.body.id}}
+Content-Type: application/json
+
+{ "boardGameId": 999999 }
+
+### PATCH d'une partie inexistante → 404
+PATCH {{base}}/plays/999999
+Content-Type: application/json
+
+{ "boardGameId": 2 }
+
+### PATCH sans aucun champ → 400
+PATCH {{base}}/plays/{{play1.response.body.id}}
+Content-Type: application/json
+
+{}
 
 ### Joueur hors soirée → 400
 POST {{base}}/plays
