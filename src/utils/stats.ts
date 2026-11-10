@@ -31,3 +31,19 @@ export function standings(plays: Play[]): PlayerStanding[] {
     (a, b) => b.wins - a.wins || b.wins / b.plays - a.wins / a.plays || a.player.name.localeCompare(b.player.name),
   );
 }
+
+export type GamePopularity = {
+  title: string;
+  plays: number;
+};
+
+/** Number of plays per board game, most played first. */
+export function mostPlayedGames(plays: Play[]): GamePopularity[] {
+  const counts = new Map<number, GamePopularity>();
+  for (const play of plays) {
+    const entry = counts.get(play.boardGame.id) ?? { title: play.boardGame.title, plays: 0 };
+    entry.plays += 1;
+    counts.set(play.boardGame.id, entry);
+  }
+  return [...counts.values()].sort((a, b) => b.plays - a.plays || a.title.localeCompare(b.title));
+}

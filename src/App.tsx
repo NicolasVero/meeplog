@@ -1,11 +1,12 @@
 import { AppShell, Container, Group, Text } from '@mantine/core';
-import { NavLink, Route, Routes } from 'react-router';
+import { Link, NavLink, Route, Routes } from 'react-router';
 import GameNightsPage from './pages/GameNightsPage';
 import CreateGameNightsPage from './pages/CreateGameNightsPage';
 import GameNightPage from './pages/GameNightPage';
 import EditGameNightPage from './pages/EditGameNightPage';
 import BoardGamesPage from './pages/BoardGamesPage';
 import PlayersPage from './pages/PlayersPage';
+import HomePage from './pages/HomePage';
 import classes from './App.module.css';
 
 const links = [
@@ -20,7 +21,9 @@ export default function App() {
       <AppShell.Header>
         <Container size="md" h="100%">
           <Group h="100%" justify="space-between">
-            <Text fw={700}>Meeplog</Text>
+            <Text component={Link} to="/" fw={700} c="inherit" td="none">
+              Meeplog
+            </Text>
             <Group gap={4} component="nav">
               {links.map((link) => (
                 <NavLink key={link.to} to={link.to} className={classes.link}>
@@ -35,7 +38,7 @@ export default function App() {
       <AppShell.Main>
         <Container size="md">
           <Routes>
-            <Route index element={<h1>index</h1>} />
+            <Route index element={<HomePage />} />
             <Route path="game-nights" element={<GameNightsPage />} />
             <Route path="game-nights/new" element={<CreateGameNightsPage />} />
             <Route path="game-nights/:id" element={<GameNightPage />} />
