@@ -2,13 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, Group, Input, NumberInput, Select, Stack, Text } from '@mantine/core';
 import { useForm, type FormErrors } from '@mantine/form';
 import { boardGamesQuery } from '../api/board-games';
-import { useCreatePlay } from '../api/plays';
-import type { BoardGame, CreatePlayInput, Player } from '../api/types';
+import { useCreatePlay, useUpdatePlay } from '../api/plays';
+import type { BoardGame, CreatePlayInput, Play, Player } from '../api/types';
+import { notifySuccess } from '../utils/feedback';
 import ApiErrorAlert from './ApiErrorAlert';
 
 interface Props {
   nightId: number;
   players: Player[];
+  /** Edits this play when given, creates a new one otherwise. */
+  play?: Play;
   onSuccess: () => void;
 }
 
@@ -36,6 +39,14 @@ function validate(values: FormValues, boardGame: BoardGame | undefined): FormErr
   return errors;
 }
 
+function toFormValues(play?: Play): FormValues {
+  if (!play) return { boardGameId: null, scores: {} };
+  return {
+    boardGameId: String(play.boardGame.id),
+    scores: Object.fromEntries(play.scores.map((s) => [s.player.id, s.score])),
+  };
+}
+
 function toInput(nightId: number, values: FormValues): CreatePlayInput {
   return {
     gameNightId: nightId,
@@ -44,20 +55,27 @@ function toInput(nightId: number, values: FormValues): CreatePlayInput {
   };
 }
 
-export default function AddPlayForm({ nightId, players, onSuccess }: Props) {
+export default function PlayForm({ nightId, players, play, onSuccess }: Props) {
   const boardGames = useQuery(boardGamesQuery());
   const createPlay = useCreatePlay();
+  const updatePlay = useUpdatePlay(play?.id ?? 0);
+  const mutation = play ? updatePlay : createPlay;
 
   const options = boardGames.data?.map((bg) => ({ value: String(bg.id), label: bg.title })) ?? [];
   const findGame = (id: string | null) => boardGames.data?.find((bg) => String(bg.id) === id);
 
   const form = useForm<FormValues>({
-    initialValues: { boardGameId: null, scores: {} },
+    initialValues: toFormValues(play),
     validate: (values) => validate(values, findGame(values.boardGameId)),
   });
 
   function handleSubmit(values: FormValues) {
-    createPlay.mutate(toInput(nightId, values), { onSuccess });
+    mutation.mutate(toInput(nightId, values), {
+      onSuccess: () => {
+        notifySuccess(play ? 'Partie modifiée' : 'Partie ajoutée');
+        onSuccess();
+      },
+    });
   }
 
   function setScore(playerId: number, score: number | string) {
@@ -68,7 +86,7 @@ export default function AddPlayForm({ nightId, players, onSuccess }: Props) {
   return (
     <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack>
-        <ApiErrorAlert error={createPlay.error} title="La partie n'a pas pu être créée" />
+        <ApiErrorAlert error={mutation.error} title="La partie n'a pas pu être enregistrée" />
         <ApiErrorAlert error={boardGames.error} title="Impossible de charger les jeux" />
 
         <Select
@@ -101,8 +119,8 @@ export default function AddPlayForm({ nightId, players, onSuccess }: Props) {
         </Input.Wrapper>
 
         <Group justify="flex-end">
-          <Button type="submit" loading={createPlay.isPending}>
-            Ajouter la partie
+          <Button type="submit" loading={mutation.isPending}>
+            {play ? 'Enregistrer' : 'Ajouter la partie'}
           </Button>
         </Group>
       </Stack>
