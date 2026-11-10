@@ -1,75 +1,58 @@
-# React + TypeScript + Vite
+# Meeplog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Carnet de soirées jeux de société : on enregistre les soirées, les jeux joués, les scores de chaque joueur, et l'app calcule les classements.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Partie | Technos |
+| --- | --- |
+| Front (`/`) | React 19, Vite, TypeScript, Mantine 9 (core, form, dates, modals, notifications), TanStack Query, React Router |
+| API (`/server`) | Express 5, Zod, Prisma, PostgreSQL |
 
-## React Compiler
+## Démarrer
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Prérequis : Node 20+ et une base PostgreSQL.
 
-## Expanding the ESLint configuration
+```bash
+# API
+cd server
+npm install
+# server/.env : DATABASE_URL=postgresql://... et PORT=4000
+npm run db:push    # crée les tables
+npm run db:seed    # données de démo (optionnel)
+npm run dev        # http://localhost:4000
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+# Front (autre terminal, à la racine)
+npm install
+npm run dev        # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+En dev, Vite redirige `/api/*` vers `http://localhost:4000` (voir `vite.config.ts`). En production, définir `VITE_API_URL`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Commande | Rôle |
+| --- | --- |
+| `npm run dev` | Serveur de dev Vite |
+| `npm run build` | Vérification TypeScript + build de production |
+| `npm run lint` | ESLint |
+| `server: npm run db:reset` | Réinitialise la base et relance le seed |
+
+Le dossier `server/requests` contient des requêtes `.http` pour tester l'API à la main.
+
+## Organisation du front
 
 ```
+src/
+  api/          client fetch, types, query options et mutations par ressource
+  components/   formulaires (GameNightFields, PlayForm, PlayerForm, BoardGameForm) et composants d'affichage
+  pages/        une page par route
+  utils/        dates, statistiques (victoires, classements), notifications et confirmations
+```
+
+Conventions :
+
+- Les formulaires utilisent `@mantine/form`, avec des fonctions pures `validate`, `toInput` et `toFormValues` définies hors du composant.
+- Un même formulaire sert à la création et à la modification : il reçoit l'entité en prop optionnelle.
+- Les pages de détail chargent la donnée, puis montent le formulaire une fois qu'elle est disponible, ce qui évite un `useEffect` pour initialiser les valeurs.
+- Après une mutation, on invalide les query keys de la ressource concernée.
