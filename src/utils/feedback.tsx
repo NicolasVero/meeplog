@@ -1,3 +1,4 @@
+import { ApiError } from '../api/client';
 import { Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
@@ -25,4 +26,13 @@ export function confirmDelete({ title, message, onConfirm }: ConfirmDeleteOption
     confirmProps: { color: 'red' },
     onConfirm,
   });
+}
+
+/** The API answers 409 when a row is still referenced (e.g. a game that was played). */
+export function notifyDeleteError(error: Error, inUseMessage: string) {
+  if (error instanceof ApiError && error.status === 409) {
+    notifications.show({ color: 'red', title: 'Suppression impossible', message: inUseMessage });
+  } else {
+    notifyError(error, 'La suppression a échoué');
+  }
 }
