@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ActionIcon, Button, Group, Modal, Stack, Table, Text, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Avatar, Button, Group, Modal, Stack, Table, Text, Title } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { bggUrl } from '../api/bgg';
 import { boardGamesQuery, useDeleteBoardGame } from '../api/board-games';
 import type { BoardGame } from '../api/types';
 import BoardGameForm from '../components/BoardGameForm';
+import BggSyncForm from '../components/BggSyncForm';
 import EmptyState from '../components/EmptyState';
 import { QueryState } from '../components/QueryState';
 import { confirmDelete, notifyDeleteError, notifySuccess } from '../utils/feedback';
@@ -16,6 +19,7 @@ export default function BoardGamesPage() {
   const deleteBoardGame = useDeleteBoardGame();
   const [editing, setEditing] = useState<Editing>(null);
   const close = () => setEditing(null);
+  const [syncOpened, sync] = useDisclosure(false);
 
   function handleDelete(game: BoardGame) {
     confirmDelete({
@@ -35,7 +39,12 @@ export default function BoardGamesPage() {
     <Stack>
       <Group justify="space-between">
         <Title order={1}>Jeux</Title>
-        <Button onClick={() => setEditing('new')}>Ajouter un jeu</Button>
+        <Group gap="xs">
+          <Button variant="default" onClick={sync.open}>
+            Synchroniser avec BGG
+          </Button>
+          <Button onClick={() => setEditing('new')}>Ajouter un jeu</Button>
+        </Group>
       </Group>
 
       <QueryState query={query} />
@@ -50,6 +59,7 @@ export default function BoardGamesPage() {
             <Table.Tr>
               <Table.Th>Titre</Table.Th>
               <Table.Th>Joueurs</Table.Th>
+              <Table.Th visibleFrom="xs">Durée</Table.Th>
               <Table.Th visibleFrom="sm">Description</Table.Th>
               <Table.Th />
             </Table.Tr>
@@ -57,10 +67,31 @@ export default function BoardGamesPage() {
           <Table.Tbody>
             {games.map((game) => (
               <Table.Tr key={game.id}>
-                <Table.Td fw={500}>{game.title}</Table.Td>
+                <Table.Td>
+                  <Group gap="sm" wrap="nowrap">
+                    <Avatar src={game.thumbnailUrl} name={game.title} color="initials" radius="sm" size="md" />
+                    <Stack gap={0}>
+                      <Text fw={500} size="sm">
+                        {game.title}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {[game.yearPublished, game.bggRating && `★ ${game.bggRating.toFixed(1)}`].filter(Boolean).join(' · ')}
+                        {game.bggId && (
+                          <>
+                            {(game.yearPublished || game.bggRating) && ' · '}
+                            <Anchor href={bggUrl(game.bggId)} target="_blank" rel="noreferrer" size="xs">
+                              BGG
+                            </Anchor>
+                          </>
+                        )}
+                      </Text>
+                    </Stack>
+                  </Group>
+                </Table.Td>
                 <Table.Td>
                   {game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers}–${game.maxPlayers}`}
                 </Table.Td>
+                <Table.Td visibleFrom="xs">{game.playingTime ? `${game.playingTime} min` : '–'}</Table.Td>
                 <Table.Td visibleFrom="sm">
                   <Text size="sm" c="dimmed" lineClamp={2}>
                     {game.description}
@@ -89,6 +120,17 @@ export default function BoardGamesPage() {
 
       <Modal opened={editing !== null} onClose={close} title={editing === 'new' ? 'Ajouter un jeu' : 'Modifier le jeu'} centered>
         {editing !== null && <BoardGameForm game={editing === 'new' ? undefined : editing} onSuccess={close} onCancel={close} />}
+      </Modal>
+
+      <Text size="xs" c="dimmed" ta="center">
+        Données de jeux fournies par{' '}
+        <Anchor href="https://boardgamegeek.com" target="_blank" rel="noreferrer" size="xs">
+          BoardGameGeek
+        </Anchor>
+      </Text>
+
+      <Modal opened={syncOpened} onClose={sync.close} title="Synchroniser avec BoardGameGeek" centered>
+        {syncOpened && <BggSyncForm onDone={sync.close} />}
       </Modal>
     </Stack>
   );

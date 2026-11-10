@@ -1,15 +1,43 @@
-import { Button, Group, NumberInput, Stack, TextInput, Textarea } from '@mantine/core';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  Anchor,
+  Button,
+  CloseButton,
+  Divider,
+  Group,
+  Image,
+  NumberInput,
+  Paper,
+  Stack,
+  Text,
+  TextInput,
+  Textarea,
+} from '@mantine/core';
 import { useForm, type FormErrors } from '@mantine/form';
+import { bggGameQuery, bggUrl, type BggSearchResult } from '../api/bgg';
 import { useCreateBoardGame, useUpdateBoardGame } from '../api/board-games';
 import type { BoardGame, CreateBoardGameInput } from '../api/types';
-import { notifySuccess } from '../utils/feedback';
+import { notifyError, notifySuccess } from '../utils/feedback';
 import ApiErrorAlert from './ApiErrorAlert';
+import BggSearch from './BggSearch';
+
+/** BGG data that is not edited by hand, kept as-is while the game stays linked. */
+type BggLink = {
+  bggId: number;
+  thumbnailUrl: string | null;
+  imageUrl: string | null;
+  bggRating: number | null;
+};
 
 type FormValues = {
   title: string;
   minPlayers: number | '';
   maxPlayers: number | '';
+  playingTime: number | '';
+  yearPublished: number | '';
   description: string;
+  bgg: BggLink | null;
 };
 
 function toFormValues(game?: BoardGame): FormValues {
@@ -17,7 +45,12 @@ function toFormValues(game?: BoardGame): FormValues {
     title: game?.title ?? '',
     minPlayers: game?.minPlayers ?? 2,
     maxPlayers: game?.maxPlayers ?? 4,
+    playingTime: game?.playingTime ?? '',
+    yearPublished: game?.yearPublished ?? '',
     description: game?.description ?? '',
+    bgg: game?.bggId
+      ? { bggId: game.bggId, thumbnailUrl: game.thumbnailUrl, imageUrl: game.imageUrl, bggRating: game.bggRating }
+      : null,
   };
 }
 
@@ -32,12 +65,20 @@ function validate(values: FormValues): FormErrors {
   return errors;
 }
 
+const orNull = (value: number | '') => (value === '' ? null : value);
+
 function toInput(values: FormValues): CreateBoardGameInput {
   return {
     title: values.title.trim(),
     minPlayers: Number(values.minPlayers),
     maxPlayers: Number(values.maxPlayers),
+    playingTime: orNull(values.playingTime),
+    yearPublished: orNull(values.yearPublished),
     description: values.description.trim() || null,
+    bggId: values.bgg?.bggId ?? null,
+    thumbnailUrl: values.bgg?.thumbnailUrl ?? null,
+    imageUrl: values.bgg?.imageUrl ?? null,
+    bggRating: values.bgg?.bggRating ?? null,
   };
 }
 
@@ -49,11 +90,41 @@ interface Props {
 }
 
 export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
+  const queryClient = useQueryClient();
   const createBoardGame = useCreateBoardGame();
   const updateBoardGame = useUpdateBoardGame(game?.id ?? 0);
   const mutation = game ? updateBoardGame : createBoardGame;
+  const [loadingBgg, setLoadingBgg] = useState(false);
 
   const form = useForm<FormValues>({ initialValues: toFormValues(game), validate });
+  const bgg = form.values.bgg;
+
+  async function handleBggSelect(result: BggSearchResult) {
+    setLoadingBgg(true);
+    try {
+      const details = await queryClient.fetchQuery(bggGameQuery(result.bggId));
+      form.setValues({
+        // Keep the name that was searched (often the French title) rather than BGG's primary name.
+        title: result.name,
+        minPlayers: details.minPlayers,
+        maxPlayers: details.maxPlayers,
+        playingTime: details.playingTime ?? '',
+        yearPublished: details.yearPublished ?? '',
+        description: details.description ?? '',
+        bgg: {
+          bggId: details.bggId,
+          thumbnailUrl: details.thumbnailUrl,
+          imageUrl: details.imageUrl,
+          bggRating: details.bggRating,
+        },
+      });
+      form.clearErrors();
+    } catch (error) {
+      notifyError(error as Error, 'Impossible de récupérer la fiche BGG');
+    } finally {
+      setLoadingBgg(false);
+    }
+  }
 
   function handleSubmit(values: FormValues) {
     mutation.mutate(toInput(values), {
@@ -69,13 +140,36 @@ export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
       <Stack>
         <ApiErrorAlert error={mutation.error} title="Le jeu n'a pas pu être enregistré" />
 
-        <TextInput label="Titre" withAsterisk data-autofocus key={form.key('title')} {...form.getInputProps('title')} />
+        {bgg ? (
+          <Paper withBorder p="xs">
+            <Group wrap="nowrap" gap="sm">
+              {bgg.thumbnailUrl && <Image src={bgg.thumbnailUrl} alt="" w={48} h={48} fit="contain" radius="sm" />}
+              <Stack gap={0} style={{ flex: 1 }}>
+                <Text size="sm" fw={500}>
+                  Lié à BoardGameGeek
+                </Text>
+                <Anchor href={bggUrl(bgg.bggId)} target="_blank" rel="noreferrer" size="xs">
+                  Voir la fiche BGG{bgg.bggRating ? ` · note ${bgg.bggRating.toFixed(1)}` : ''}
+                </Anchor>
+              </Stack>
+              <CloseButton aria-label="Dissocier de BGG" onClick={() => form.setFieldValue('bgg', null)} />
+            </Group>
+          </Paper>
+        ) : (
+          <>
+            <BggSearch onSelect={handleBggSelect} />
+            <Divider label="ou saisir à la main" labelPosition="center" />
+          </>
+        )}
+
+        <TextInput label="Titre" withAsterisk disabled={loadingBgg} key={form.key('title')} {...form.getInputProps('title')} />
         <Group grow>
           <NumberInput
             label="Joueurs min."
             withAsterisk
             min={1}
             allowDecimal={false}
+            disabled={loadingBgg}
             key={form.key('minPlayers')}
             {...form.getInputProps('minPlayers')}
           />
@@ -84,17 +178,44 @@ export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
             withAsterisk
             min={1}
             allowDecimal={false}
+            disabled={loadingBgg}
             key={form.key('maxPlayers')}
             {...form.getInputProps('maxPlayers')}
           />
         </Group>
-        <Textarea label="Description" autosize minRows={2} key={form.key('description')} {...form.getInputProps('description')} />
+        <Group grow>
+          <NumberInput
+            label="Durée (min)"
+            min={0}
+            allowDecimal={false}
+            disabled={loadingBgg}
+            key={form.key('playingTime')}
+            {...form.getInputProps('playingTime')}
+          />
+          <NumberInput
+            label="Année"
+            min={0}
+            allowDecimal={false}
+            disabled={loadingBgg}
+            key={form.key('yearPublished')}
+            {...form.getInputProps('yearPublished')}
+          />
+        </Group>
+        <Textarea
+          label="Description"
+          autosize
+          minRows={2}
+          maxRows={8}
+          disabled={loadingBgg}
+          key={form.key('description')}
+          {...form.getInputProps('description')}
+        />
 
         <Group justify="flex-end">
           <Button variant="default" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit" loading={mutation.isPending}>
+          <Button type="submit" loading={mutation.isPending || loadingBgg}>
             {game ? 'Enregistrer' : 'Ajouter le jeu'}
           </Button>
         </Group>
