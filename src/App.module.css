@@ -1,12 +1,43 @@
+/* Light grey canvas so white cards and tables stand out; near-black in dark mode. */
+.main {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+}
+
+.header {
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mantine-color-text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--mantine-font-size-lg);
+}
+
+.logoMark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-primary-color-filled);
+  color: var(--mantine-color-white);
+  font-size: 14px;
+}
+
 .link {
   padding: 6px 12px;
   border-radius: var(--mantine-radius-md);
-  color: var(--mantine-color-text);
+  color: var(--mantine-color-dimmed);
   text-decoration: none;
   font-size: var(--mantine-font-size-sm);
   font-weight: 500;
 
   @mixin hover {
+    color: var(--mantine-color-text);
     background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
   }
 

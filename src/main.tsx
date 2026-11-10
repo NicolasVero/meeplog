@@ -1,3 +1,4 @@
+import '@fontsource-variable/inter';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
@@ -23,7 +24,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="light">
       <DatesProvider settings={{ locale: 'fr', firstDayOfWeek: 1 }}>
         <QueryClientProvider client={queryClient}>
           <ModalsProvider labels={{ confirm: 'Confirmer', cancel: 'Annuler' }}>

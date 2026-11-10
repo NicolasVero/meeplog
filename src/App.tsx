@@ -1,4 +1,4 @@
-import { AppShell, Container, Group, Text } from '@mantine/core';
+import { AppShell, Container, Group } from '@mantine/core';
 import { Link, NavLink, Route, Routes } from 'react-router';
 import GameNightsPage from './pages/GameNightsPage';
 import CreateGameNightsPage from './pages/CreateGameNightsPage';
@@ -8,6 +8,7 @@ import BoardGamesPage from './pages/BoardGamesPage';
 import PlayersPage from './pages/PlayersPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
+import ColorSchemeToggle from './components/ColorSchemeToggle';
 import classes from './App.module.css';
 
 const links = [
@@ -19,24 +20,30 @@ const links = [
 export default function App() {
   return (
     <AppShell header={{ height: 56 }} padding="md">
-      <AppShell.Header>
+      <AppShell.Header className={classes.header}>
         <Container size="md" h="100%">
           <Group h="100%" justify="space-between">
-            <Text component={Link} to="/" fw={700} c="inherit" td="none">
+            <Link to="/" className={classes.logo}>
+              <span className={classes.logoMark} aria-hidden>
+                M
+              </span>
               Meeplog
-            </Text>
-            <Group gap={4} component="nav">
-              {links.map((link) => (
-                <NavLink key={link.to} to={link.to} className={classes.link}>
-                  {link.label}
-                </NavLink>
-              ))}
+            </Link>
+            <Group gap="xs" wrap="nowrap">
+              <Group gap={4} component="nav">
+                {links.map((link) => (
+                  <NavLink key={link.to} to={link.to} className={classes.link}>
+                    {link.label}
+                  </NavLink>
+                ))}
+              </Group>
+              <ColorSchemeToggle />
             </Group>
           </Group>
         </Container>
       </AppShell.Header>
 
-      <AppShell.Main>
+      <AppShell.Main className={classes.main}>
         <Container size="md">
           <Routes>
             <Route index element={<HomePage />} />
