@@ -23,11 +23,8 @@ export default function App() {
       <AppShell.Header className={classes.header}>
         <Container size="md" h="100%">
           <Group h="100%" justify="space-between">
-            <Link to="/" className={classes.logo}>
-              <span className={classes.logoMark} aria-hidden>
-                M
-              </span>
-              Meeplog
+            <Link to="/" className={classes.logo} aria-label="Meeplog, accueil">
+              <img src="/meeplog-logo.png" alt="" className={classes.logoImage} />
             </Link>
             <Group gap="xs" wrap="nowrap">
               <Group gap={4} component="nav">
