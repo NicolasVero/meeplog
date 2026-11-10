@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router';
-import { Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { Button, Group, Stack, Title } from '@mantine/core';
 import { useForm, type FormErrors } from '@mantine/form';
 import dayjs from 'dayjs';
 import { useCreateGameNight } from '../api/game-nights';
 import type { CreateGameNightInput } from '../api/types';
 import PlayerSelectorList from '../components/PlayerSelectorList';
 import ApiErrorAlert from '../components/ApiErrorAlert';
+import GameNightFields from '../components/GameNightFields';
 
 type FormValues = {
   date: string | null; // "YYYY-MM-DD"
@@ -56,9 +56,7 @@ export default function CreateGameNightsPage() {
 
         <ApiErrorAlert error={createGameNight.error} title="La soirée n'a pas pu être créée" />
 
-        <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" key={form.key('date')} {...form.getInputProps('date')} />
-        <TextInput label="Lieu" placeholder="Chez Paul" key={form.key('location')} {...form.getInputProps('location')} />
-        <Textarea label="Notes" autosize minRows={2} key={form.key('notes')} {...form.getInputProps('notes')} />
+        <GameNightFields form={form} />
 
         <PlayerSelectorList
           value={form.values.playerIds}

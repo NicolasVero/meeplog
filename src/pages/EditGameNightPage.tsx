@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router';
-import { Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { Button, Group, Stack, Title } from '@mantine/core';
 import { useForm, type FormErrors } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -8,6 +7,7 @@ import { gameNightQuery, useUpdateGameNight } from '../api/game-nights';
 import type { GameNight, UpdateGameNightInput } from '../api/types';
 import { QueryState } from '../components/QueryState';
 import ApiErrorAlert from '../components/ApiErrorAlert';
+import GameNightFields from '../components/GameNightFields';
 
 type FormValues = {
   date: string | null; // "YYYY-MM-DD"
@@ -68,9 +68,7 @@ function EditGameNightForm({ night }: { night: GameNight }) {
 
         <ApiErrorAlert error={updateGameNight.error} title="La soirée n'a pas pu être modifiée" />
 
-        <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" key={form.key('date')} {...form.getInputProps('date')} />
-        <TextInput label="Lieu" placeholder="Chez Paul" key={form.key('location')} {...form.getInputProps('location')} />
-        <Textarea label="Notes" autosize minRows={2} key={form.key('notes')} {...form.getInputProps('notes')} />
+        <GameNightFields form={form} />
 
         <Group justify="flex-end">
           <Button variant="default" onClick={() => navigate(-1)}>
