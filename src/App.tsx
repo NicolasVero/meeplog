@@ -1,4 +1,4 @@
-import { AppShell, Container, Group } from '@mantine/core';
+import { AppShell, Container, Group, Image } from '@mantine/core';
 import { Link, NavLink, Route, Routes } from 'react-router';
 import GameNightsPage from './pages/GameNightsPage';
 import CreateGameNightsPage from './pages/CreateGameNightsPage';
@@ -24,7 +24,8 @@ export default function App() {
         <Container size="md" h="100%">
           <Group h="100%" justify="space-between">
             <Link to="/" className={classes.logo} aria-label="Meeplog, accueil">
-              <img src="/meeplog-logo.png" alt="" className={classes.logoImage} />
+              <Image src="/logo-on-light.svg" alt="" h={32} w="auto" darkHidden />
+              <Image src="/logo-on-dark.svg" alt="" h={32} w="auto" lightHidden />
             </Link>
             <Group gap="xs" wrap="nowrap">
               <Group gap={4} component="nav">

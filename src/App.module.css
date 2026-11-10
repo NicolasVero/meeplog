@@ -7,27 +7,8 @@
   background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
 }
 
-/*
- * meeplog-logo.png is 1760x800 with wide transparent margins around the artwork
- * (roughly x 200-1565, y 208-590). The wrapper shows only that area at 30px high:
- * scale = 30 / 382, so the image is 63px high and shifted by the scaled margins.
- */
 .logo {
-  display: block;
-  width: 107px;
-  height: 30px;
-  overflow: hidden;
-}
-
-.logoImage {
-  display: block;
-  height: 63px;
-  margin: -16.3px 0 0 -15.7px;
-}
-
-/* The artwork is black: invert it so it stays readable on the dark header. */
-:where([data-mantine-color-scheme='dark']) .logoImage {
-  filter: invert(1);
+  display: flex;
 }
 
 .link {
