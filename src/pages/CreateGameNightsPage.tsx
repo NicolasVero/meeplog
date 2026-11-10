@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { useForm, type FormErrors } from '@mantine/form';
 import dayjs from 'dayjs';
 import { useCreateGameNight } from '../api/game-nights';
 import type { CreateGameNightInput } from '../api/types';
@@ -14,8 +14,6 @@ type FormValues = {
   notes: string;
   playerIds: number[];
 };
-
-type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 const initialValues: FormValues = {
   date: dayjs().format('YYYY-MM-DD'),
@@ -43,57 +41,30 @@ function toInput(values: FormValues): CreateGameNightInput {
 export default function CreateGameNightsPage() {
   const navigate = useNavigate();
   const createGameNight = useCreateGameNight();
+  const form = useForm<FormValues>({ initialValues, validate });
 
-  const [values, setValues] = useState<FormValues>(initialValues);
-  const [submitted, setSubmitted] = useState(false);
-
-  const errors = submitted ? validate(values) : {};
-
-  function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
-    setValues((current) => ({ ...current, [key]: value }));
-  }
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitted(true);
-
-    if (Object.keys(validate(values)).length > 0) return;
-
+  function handleSubmit(values: FormValues) {
     createGameNight.mutate(toInput(values), {
       onSuccess: (night) => navigate(`/game-nights/${night.id}`, { replace: true }),
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack maw={560}>
         <Title order={1}>Nouvelle soirée</Title>
 
         <ApiErrorAlert error={createGameNight.error} title="La soirée n'a pas pu être créée" />
 
-        <DateInput
-          label="Date"
-          withAsterisk
-          valueFormat="DD/MM/YYYY"
-          value={values.date}
-          onChange={(date) => update('date', date)}
-          error={errors.date}
-        />
-        <TextInput
-          label="Lieu"
-          placeholder="Chez Paul"
-          value={values.location}
-          onChange={(e) => update('location', e.currentTarget.value)}
-        />
-        <Textarea
-          label="Notes"
-          autosize
-          minRows={2}
-          value={values.notes}
-          onChange={(e) => update('notes', e.currentTarget.value)}
-        />
+        <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" key={form.key('date')} {...form.getInputProps('date')} />
+        <TextInput label="Lieu" placeholder="Chez Paul" key={form.key('location')} {...form.getInputProps('location')} />
+        <Textarea label="Notes" autosize minRows={2} key={form.key('notes')} {...form.getInputProps('notes')} />
 
-        <PlayerSelectorList value={values.playerIds} onChange={(ids) => update('playerIds', ids)} error={errors.playerIds} />
+        <PlayerSelectorList
+          value={form.values.playerIds}
+          onChange={(ids) => form.setFieldValue('playerIds', ids)}
+          error={form.errors.playerIds as string | undefined}
+        />
 
         <Group justify="flex-end">
           <Button variant="default" onClick={() => navigate(-1)}>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { playersQuery } from '../api/players';
 import { QueryState } from '../components/QueryState';
-import { Button, Group, Title, Modal, Input } from '@mantine/core';
+import { Button, Group, Title, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import AddPlayerForm from '../components/AddPlayerForm';
 
@@ -27,7 +27,7 @@ export default function PlayersPage() {
       </section>
 
       <Modal opened={opened} onClose={close} title="Créer un joueur" centered>
-        <AddPlayerForm onSuccess={close} />
+        <AddPlayerForm onSuccess={close} onCancel={close} />
       </Modal>
     </>
   );

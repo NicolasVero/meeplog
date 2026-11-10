@@ -1,41 +1,50 @@
-import { useState } from 'react';
+import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { useCreatePlayer } from '../api/players';
-import { Button, Group, Input } from '@mantine/core';
-
-type FormValues = {
-  name: string;
-};
+import ApiErrorAlert from './ApiErrorAlert';
 
 interface Props {
   onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export default function AddPlayerForm({ onSuccess }: Props) {
-  const initialValues: FormValues = {
-    name: '',
-  };
-
-  const [values, setValues] = useState<FormValues>(initialValues);
+export default function AddPlayerForm({ onSuccess, onCancel }: Props) {
   const createPlayer = useCreatePlayer();
 
-  function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
-    setValues((current) => ({ ...current, [key]: value }));
-  }
+  const form = useForm({
+    initialValues: { name: '' },
+    validate: {
+      name: (name) => (name.trim() ? null : 'Le nom est obligatoire'),
+    },
+  });
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    createPlayer.mutate({ name: values.name }, { onSuccess });
+  function handleSubmit({ name }: typeof form.values) {
+    createPlayer.mutate({ name: name.trim() }, { onSuccess });
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Input placeholder="Nom du joueur" onChange={(e) => update('name', e.currentTarget.value)} />
-      <Group justify="flex-end">
-        <Button variant="default" onClick={onSuccess}>
-          Annuler
-        </Button>
-        <Button type="submit">Créer le joueur</Button>
-      </Group>
+    <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
+      <Stack>
+        <ApiErrorAlert error={createPlayer.error} title="Le joueur n'a pas pu être créé" />
+
+        <TextInput
+          label="Nom"
+          placeholder="Nom du joueur"
+          withAsterisk
+          data-autofocus
+          key={form.key('name')}
+          {...form.getInputProps('name')}
+        />
+
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" loading={createPlayer.isPending}>
+            Créer le joueur
+          </Button>
+        </Group>
+      </Stack>
     </form>
   );
 }

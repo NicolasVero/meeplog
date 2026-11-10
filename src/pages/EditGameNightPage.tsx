@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button, Group, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { useForm, type FormErrors } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { gameNightQuery, useUpdateGameNight } from '../api/game-nights';
@@ -14,8 +14,6 @@ type FormValues = {
   location: string;
   notes: string;
 };
-
-type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 // API -> form: the opposite of toInput. null becomes '' so inputs stay controlled.
 function toFormValues(night: GameNight): FormValues {
@@ -51,59 +49,28 @@ export default function EditGameNightPage() {
 }
 
 // ...and the form is only mounted once the data is there,
-// so useState can be initialized directly from it (no useEffect needed).
+// so it can be initialized directly from it (no useEffect needed).
 function EditGameNightForm({ night }: { night: GameNight }) {
   const navigate = useNavigate();
   const updateGameNight = useUpdateGameNight(night.id);
+  const form = useForm<FormValues>({ initialValues: toFormValues(night), validate });
 
-  const [values, setValues] = useState<FormValues>(() => toFormValues(night));
-  const [submitted, setSubmitted] = useState(false);
-
-  const errors = submitted ? validate(values) : {};
-
-  function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
-    setValues((current) => ({ ...current, [key]: value }));
-  }
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitted(true);
-
-    if (Object.keys(validate(values)).length > 0) return;
-
+  function handleSubmit(values: FormValues) {
     updateGameNight.mutate(toInput(values), {
       onSuccess: () => navigate(`/game-nights/${night.id}`, { replace: true }),
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack maw={560}>
         <Title order={1}>Modifier la soirée</Title>
 
         <ApiErrorAlert error={updateGameNight.error} title="La soirée n'a pas pu être modifiée" />
 
-        <DateInput
-          label="Date"
-          withAsterisk
-          valueFormat="DD/MM/YYYY"
-          value={values.date}
-          onChange={(date) => update('date', date)}
-          error={errors.date}
-        />
-        <TextInput
-          label="Lieu"
-          placeholder="Chez Paul"
-          value={values.location}
-          onChange={(e) => update('location', e.currentTarget.value)}
-        />
-        <Textarea
-          label="Notes"
-          autosize
-          minRows={2}
-          value={values.notes}
-          onChange={(e) => update('notes', e.currentTarget.value)}
-        />
+        <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" key={form.key('date')} {...form.getInputProps('date')} />
+        <TextInput label="Lieu" placeholder="Chez Paul" key={form.key('location')} {...form.getInputProps('location')} />
+        <Textarea label="Notes" autosize minRows={2} key={form.key('notes')} {...form.getInputProps('notes')} />
 
         <Group justify="flex-end">
           <Button variant="default" onClick={() => navigate(-1)}>

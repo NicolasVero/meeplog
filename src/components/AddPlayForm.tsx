@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Button, Group, NumberInput, Select, Stack, Text } from '@mantine/core';
+import { Button, Group, Input, NumberInput, Select, Stack, Text } from '@mantine/core';
+import { useForm, type FormErrors } from '@mantine/form';
 import { boardGamesQuery } from '../api/board-games';
 import { useCreatePlay } from '../api/plays';
 import type { BoardGame, CreatePlayInput, Player } from '../api/types';
@@ -16,8 +16,6 @@ type FormValues = {
   boardGameId: string | null;
   scores: Record<number, number | ''>;
 };
-
-type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 function playedScores(values: FormValues) {
   return Object.entries(values.scores)
@@ -50,31 +48,25 @@ export default function AddPlayForm({ nightId, players, onSuccess }: Props) {
   const boardGames = useQuery(boardGamesQuery());
   const createPlay = useCreatePlay();
 
-  const [values, setValues] = useState<FormValues>({ boardGameId: null, scores: {} });
-  const [submitted, setSubmitted] = useState(false);
-
   const options = boardGames.data?.map((bg) => ({ value: String(bg.id), label: bg.title })) ?? [];
-  const selectedGame = boardGames.data?.find((bg) => String(bg.id) === values.boardGameId);
-  const errors = submitted ? validate(values, selectedGame) : {};
+  const findGame = (id: string | null) => boardGames.data?.find((bg) => String(bg.id) === id);
 
-  function setScore(playerId: number, score: number | string) {
-    setValues((current) => ({
-      ...current,
-      scores: { ...current.scores, [playerId]: score === '' ? '' : Number(score) },
-    }));
-  }
+  const form = useForm<FormValues>({
+    initialValues: { boardGameId: null, scores: {} },
+    validate: (values) => validate(values, findGame(values.boardGameId)),
+  });
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitted(true);
-
-    if (Object.keys(validate(values, selectedGame)).length > 0) return;
-
+  function handleSubmit(values: FormValues) {
     createPlay.mutate(toInput(nightId, values), { onSuccess });
   }
 
+  function setScore(playerId: number, score: number | string) {
+    form.setFieldValue(`scores.${playerId}`, score === '' ? '' : Number(score));
+    form.clearFieldError('scores');
+  }
+
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack>
         <ApiErrorAlert error={createPlay.error} title="La partie n'a pas pu être créée" />
         <ApiErrorAlert error={boardGames.error} title="Impossible de charger les jeux" />
@@ -87,36 +79,26 @@ export default function AddPlayForm({ nightId, players, onSuccess }: Props) {
           searchable
           autoSelectOnBlur
           disabled={boardGames.isPending}
-          value={values.boardGameId}
-          onChange={(boardGameId) => setValues((current) => ({ ...current, boardGameId }))}
-          error={errors.boardGameId}
+          key={form.key('boardGameId')}
+          {...form.getInputProps('boardGameId')}
         />
 
-        <Stack gap="xs">
-          <Text size="sm" fw={500}>
-            Scores
-          </Text>
-          <Text size="xs" c="dimmed">
-            Laissez vide pour un joueur qui n'a pas participé.
-          </Text>
-          {players.map((player) => (
-            <Group key={player.id} justify="space-between" wrap="nowrap">
-              <Text>{player.name}</Text>
-              <NumberInput
-                aria-label={`Score de ${player.name}`}
-                w={120}
-                allowDecimal={false}
-                value={values.scores[player.id] ?? ''}
-                onChange={(score) => setScore(player.id, score)}
-              />
-            </Group>
-          ))}
-          {errors.scores && (
-            <Text size="sm" c="red">
-              {errors.scores}
-            </Text>
-          )}
-        </Stack>
+        <Input.Wrapper label="Scores" description="Laissez vide pour un joueur qui n'a pas participé." error={form.errors.scores}>
+          <Stack gap="xs" mt="xs">
+            {players.map((player) => (
+              <Group key={player.id} justify="space-between" wrap="nowrap">
+                <Text>{player.name}</Text>
+                <NumberInput
+                  aria-label={`Score de ${player.name}`}
+                  w={120}
+                  allowDecimal={false}
+                  value={form.values.scores[player.id] ?? ''}
+                  onChange={(score) => setScore(player.id, score)}
+                />
+              </Group>
+            ))}
+          </Stack>
+        </Input.Wrapper>
 
         <Group justify="flex-end">
           <Button type="submit" loading={createPlay.isPending}>
