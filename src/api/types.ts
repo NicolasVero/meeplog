@@ -7,6 +7,14 @@ export type BoardGame = {
   maxPlayers: number;
   description: string | null;
   createdAt: string;
+  // BoardGameGeek data, null for games entered by hand
+  bggId: number | null;
+  yearPublished: number | null;
+  playingTime: number | null; // minutes
+  thumbnailUrl: string | null;
+  imageUrl: string | null;
+  bggRating: number | null;
+  bggSyncedAt: string | null;
 };
 
 export type CreateBoardGameInput = {
@@ -14,6 +22,12 @@ export type CreateBoardGameInput = {
   minPlayers: number;
   maxPlayers: number;
   description?: string | null;
+  bggId?: number | null;
+  yearPublished?: number | null;
+  playingTime?: number | null;
+  thumbnailUrl?: string | null;
+  imageUrl?: string | null;
+  bggRating?: number | null;
 };
 export type UpdateBoardGameInput = Partial<CreateBoardGameInput>;
 

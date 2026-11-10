@@ -15,6 +15,15 @@ model BoardGame {
   description String?
   createdAt   DateTime @default(now())
   plays       Play[]
+
+  // BoardGameGeek data, null for games entered by hand
+  bggId         Int?      @unique
+  yearPublished Int?
+  playingTime   Int? // minutes
+  thumbnailUrl  String?
+  imageUrl      String?
+  bggRating     Float?
+  bggSyncedAt   DateTime?
 }
 
 model Player {
