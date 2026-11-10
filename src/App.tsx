@@ -7,6 +7,7 @@ import EditGameNightPage from './pages/EditGameNightPage';
 import BoardGamesPage from './pages/BoardGamesPage';
 import PlayersPage from './pages/PlayersPage';
 import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import classes from './App.module.css';
 
 const links = [
@@ -45,7 +46,7 @@ export default function App() {
             <Route path="game-nights/:id/edit" element={<EditGameNightPage />} />
             <Route path="board-games" element={<BoardGamesPage />} />
             <Route path="players" element={<PlayersPage />} />
-            <Route path="*" element={<p>Page introuvable.</p>} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Container>
       </AppShell.Main>
