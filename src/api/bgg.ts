@@ -45,10 +45,17 @@ export const bggGameQuery = (bggId: number) =>
     staleTime: 10 * 60_000,
   });
 
+export const bggConfigQuery = () =>
+  queryOptions({
+    queryKey: ['bgg', 'config'],
+    queryFn: () => api.get<{ username: string | null }>('/bgg/config'),
+    staleTime: Infinity,
+  });
+
 export function useBggSync() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (username?: string) => api.post<BggSyncReport>('/bgg/sync', username ? { username } : {}),
+    mutationFn: () => api.post<BggSyncReport>('/bgg/sync'),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: boardGameKeys.all }),
   });
 }

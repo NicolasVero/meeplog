@@ -17,7 +17,7 @@ Prérequis : Node 20+ et une base PostgreSQL.
 # API
 cd server
 npm install
-# server/.env : DATABASE_URL, PORT=4000, BGG_API_TOKEN et BGG_USERNAME (optionnel)
+# server/.env : DATABASE_URL, PORT=4000, BGG_API_TOKEN et BGG_USERNAME
 npm run db:push    # crée les tables
 npm run db:seed    # données de démo (optionnel)
 npm run dev        # http://localhost:4000
@@ -32,7 +32,7 @@ npm run dev        # http://localhost:5173
 L'intégration BGG (recherche, pré-remplissage, synchro de collection) passe par le serveur, qui garde le token secret :
 
 - `BGG_API_TOKEN` : token d'application obtenu sur boardgamegeek.com/applications ;
-- `BGG_USERNAME` : pseudo utilisé par défaut pour la synchro (le pseudo peut aussi être saisi dans l'app).
+- `BGG_USERNAME` : pseudo dont la collection est synchronisée.
 
 La synchro va de BGG vers la base uniquement (l'API BGG est en lecture seule) et ne supprime jamais de jeu.
 
