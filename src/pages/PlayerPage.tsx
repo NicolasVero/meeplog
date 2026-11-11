@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
-import { ActionIcon, Anchor, Avatar, Group, Paper, Rating, Select, Stack, Text, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Avatar, Group, Paper, Rating, Select, Stack, Table, Tabs, Text, Title } from '@mantine/core';
 import { boardGamesQuery } from '../api/board-games';
-import { playerQuery } from '../api/players';
+import { playedGamesQuery, playerQuery } from '../api/players';
 import { playerRatingsQuery, useDeleteRating, useRateGame } from '../api/ratings';
 import type { Player, Rating as GameRating } from '../api/types';
 import EmptyState from '../components/EmptyState';
 import { QueryState } from '../components/QueryState';
+import { formatShortDate } from '../utils/dates';
 import { notifyError, notifySuccess } from '../utils/feedback';
 
 const MAX_RATING = 10;
@@ -64,79 +65,139 @@ function PlayerDetails({ player }: { player: Player }) {
         <Title order={1}>{player.name}</Title>
       </Group>
 
-      <Title order={2} mt="md">
-        Noter un jeu
-      </Title>
-      <Paper withBorder p="sm">
-        <Group align="flex-end">
-          <Select
-            label="Jeu"
-            placeholder={unratedGames.length ? 'Choisir un jeu' : 'Tous les jeux sont notés'}
-            data={unratedGames.map((game) => ({ value: String(game.id), label: game.title }))}
-            value={selectedGameId}
-            onChange={setSelectedGameId}
-            disabled={unratedGames.length === 0}
-            searchable
-            style={{ flex: 1, minWidth: 200 }}
-          />
-          <Stack gap={4}>
-            <Text size="sm" fw={500}>
-              Note
-            </Text>
-            <Rating
-              count={MAX_RATING}
-              value={0}
-              readOnly={selectedGameId === null || rateGame.isPending}
-              onChange={(value) => selectedGameId !== null && rate(Number(selectedGameId), value, () => setSelectedGameId(null))}
-            />
-          </Stack>
-        </Group>
-      </Paper>
+      <Tabs defaultValue="played" keepMounted={false}>
+        <Tabs.List>
+          <Tabs.Tab value="played">Jeux joués</Tabs.Tab>
+          <Tabs.Tab value="ratings">Notes{ratings.length > 0 && ` (${ratings.length})`}</Tabs.Tab>
+        </Tabs.List>
 
-      <Title order={2} mt="md">
-        Ses notes
-      </Title>
-      <QueryState query={ratingsQuery} />
-      {ratingsQuery.data && ratings.length === 0 && <EmptyState message="Aucun jeu noté pour l’instant." />}
-      {ratings.length > 0 && (
-        <Paper withBorder>
-          {ratings.map((rating, i) => (
-            <Group
-              key={rating.boardGame.id}
-              justify="space-between"
-              p="sm"
-              wrap="nowrap"
-              style={i > 0 ? { borderTop: '1px solid var(--mantine-color-default-border)' } : undefined}
-            >
-              <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                {rating.boardGame.thumbnailUrl && <Avatar src={rating.boardGame.thumbnailUrl} radius="sm" size="sm" alt="" />}
-                <Anchor component={Link} to={`/board-games/${rating.boardGame.id}`} c="inherit" fw={500} truncate>
-                  {rating.boardGame.title}
-                </Anchor>
-              </Group>
-              <Group gap="xs" wrap="nowrap">
-                <Rating
-                  count={MAX_RATING}
-                  value={rating.value}
-                  size="sm"
-                  onChange={(value) => rate(rating.boardGame.id, value)}
+        <Tabs.Panel value="played" pt="md">
+          <PlayedGames playerId={player.id} ratings={ratings} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="ratings" pt="md">
+          <Stack>
+            <Title order={3}>Noter un jeu</Title>
+            <Paper withBorder p="sm">
+              <Group align="flex-end">
+                <Select
+                  label="Jeu"
+                  placeholder={unratedGames.length ? 'Choisir un jeu' : 'Tous les jeux sont notés'}
+                  data={unratedGames.map((game) => ({ value: String(game.id), label: game.title }))}
+                  value={selectedGameId}
+                  onChange={setSelectedGameId}
+                  disabled={unratedGames.length === 0}
+                  searchable
+                  style={{ flex: 1, minWidth: 200 }}
                 />
-                <Text size="sm" c="dimmed" w={40} ta="right">
-                  {rating.value}/{MAX_RATING}
-                </Text>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  aria-label={`Supprimer la note de ${rating.boardGame.title}`}
-                  onClick={() => removeRating(rating)}
-                >
-                  ✕
-                </ActionIcon>
+                <Stack gap={4}>
+                  <Text size="sm" fw={500}>
+                    Note
+                  </Text>
+                  <Rating
+                    count={MAX_RATING}
+                    value={0}
+                    readOnly={selectedGameId === null || rateGame.isPending}
+                    onChange={(value) =>
+                      selectedGameId !== null && rate(Number(selectedGameId), value, () => setSelectedGameId(null))
+                    }
+                  />
+                </Stack>
               </Group>
-            </Group>
-          ))}
-        </Paper>
-      )}
+            </Paper>
+
+            <Title order={3} mt="md">
+              Ses notes
+            </Title>
+            <QueryState query={ratingsQuery} />
+            {ratingsQuery.data && ratings.length === 0 && <EmptyState message="Aucun jeu noté pour l’instant." />}
+            {ratings.length > 0 && (
+              <Paper withBorder>
+                {ratings.map((rating, i) => (
+                  <Group
+                    key={rating.boardGame.id}
+                    justify="space-between"
+                    p="sm"
+                    wrap="nowrap"
+                    style={i > 0 ? { borderTop: '1px solid var(--mantine-color-default-border)' } : undefined}
+                  >
+                    <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+                      {rating.boardGame.thumbnailUrl && (
+                        <Avatar src={rating.boardGame.thumbnailUrl} radius="sm" size="sm" alt="" />
+                      )}
+                      <Anchor component={Link} to={`/board-games/${rating.boardGame.id}`} c="inherit" fw={500} truncate>
+                        {rating.boardGame.title}
+                      </Anchor>
+                    </Group>
+                    <Group gap="xs" wrap="nowrap">
+                      <Rating
+                        count={MAX_RATING}
+                        value={rating.value}
+                        size="sm"
+                        onChange={(value) => rate(rating.boardGame.id, value)}
+                      />
+                      <Text size="sm" c="dimmed" w={40} ta="right">
+                        {rating.value}/{MAX_RATING}
+                      </Text>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        aria-label={`Supprimer la note de ${rating.boardGame.title}`}
+                        onClick={() => removeRating(rating)}
+                      >
+                        ✕
+                      </ActionIcon>
+                    </Group>
+                  </Group>
+                ))}
+              </Paper>
+            )}
+          </Stack>
+        </Tabs.Panel>
+      </Tabs>
     </Stack>
+  );
+}
+
+function PlayedGames({ playerId, ratings }: { playerId: number; ratings: GameRating[] }) {
+  const query = useQuery(playedGamesQuery(playerId));
+
+  if (!query.data) return <QueryState query={query} />;
+  if (query.data.length === 0) return <EmptyState message="Aucune partie jouée pour l’instant." />;
+
+  const ratingByGame = new Map(ratings.map((r) => [r.boardGame.id, r.value]));
+
+  return (
+    <Table.ScrollContainer minWidth={480}>
+      <Table>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Jeu</Table.Th>
+            <Table.Th ta="right">Parties</Table.Th>
+            <Table.Th ta="right">Victoires</Table.Th>
+            <Table.Th ta="right">Dernière partie</Table.Th>
+            <Table.Th ta="right">Note</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {query.data.map(({ boardGame, plays, wins, lastPlayedAt }) => (
+            <Table.Tr key={boardGame.id}>
+              <Table.Td>
+                <Group gap="sm" wrap="nowrap">
+                  <Avatar src={boardGame.thumbnailUrl} name={boardGame.title} color="initials" radius="sm" size="sm" />
+                  <Anchor component={Link} to={`/board-games/${boardGame.id}`} c="inherit" fw={500} size="sm">
+                    {boardGame.title}
+                  </Anchor>
+                </Group>
+              </Table.Td>
+              <Table.Td ta="right">{plays}</Table.Td>
+              <Table.Td ta="right">{wins}</Table.Td>
+              <Table.Td ta="right">{formatShortDate(lastPlayedAt)}</Table.Td>
+              <Table.Td ta="right">{ratingByGame.has(boardGame.id) ? `${ratingByGame.get(boardGame.id)}/10` : '—'}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   );
 }

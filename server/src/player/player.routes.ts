@@ -14,6 +14,7 @@ router.post('/', validateBody(createPlayerSchema), playerController.postPlayer);
 router.patch('/:id', validateParams(idParamSchema), validateBody(updatePlayerSchema), playerController.patchPlayer);
 router.delete('/:id', validateParams(idParamSchema), playerController.deletePlayer);
 
+router.get('/:id/games', validateParams(idParamSchema), playerController.getPlayedGames);
 router.get('/:id/ratings', validateParams(idParamSchema), ratingController.getPlayerRatings);
 router.put(
   '/:id/ratings/:boardGameId',

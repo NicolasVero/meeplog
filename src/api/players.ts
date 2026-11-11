@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
-import type { CreatePlayerInput, Player, UpdatePlayerInput } from './types';
+import type { CreatePlayerInput, PlayedGame, Player, UpdatePlayerInput } from './types';
 
 export const playerKeys = {
   all: ['players'] as const,
@@ -17,6 +17,12 @@ export const playerQuery = (id: number) =>
   queryOptions({
     queryKey: playerKeys.detail(id),
     queryFn: () => api.get<Player>(`/players/${id}`),
+  });
+
+export const playedGamesQuery = (id: number) =>
+  queryOptions({
+    queryKey: [...playerKeys.detail(id), 'games'],
+    queryFn: () => api.get<PlayedGame[]>(`/players/${id}/games`),
   });
 
 export function useCreatePlayer() {

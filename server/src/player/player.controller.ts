@@ -36,3 +36,8 @@ export async function patchPlayer(req: Request, res: Response) {
 
   return res.json(player);
 }
+
+export async function getPlayedGames(req: Request, res: Response) {
+  const games = await playerService.findPlayedGames(Number(req.params.id));
+  return res.json(games);
+}

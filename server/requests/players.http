@@ -60,6 +60,9 @@ Content-Type: application/json
 
 { "name": "Alice",
 
+### Jeux joués par le joueur 1
+GET {{base}}/players/1/games
+
 ### --- Notes ---
 
 ### Notes du joueur 1
