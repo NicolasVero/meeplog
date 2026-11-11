@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
-import { Button, Group, Modal, Paper, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
+import { Anchor, Button, Group, Modal, Paper, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
 import { gameNightQuery, useDeleteGameNight } from '../api/game-nights';
 import { useDeletePlay } from '../api/plays';
 import type { GameNight, Play } from '../api/types';
@@ -124,7 +124,11 @@ function GameNightDetails({ night }: { night: GameNight }) {
             <Table.Tbody>
               {ranking.map((s) => (
                 <Table.Tr key={s.player.id}>
-                  <Table.Td>{s.player.name}</Table.Td>
+                  <Table.Td>
+                    <Anchor component={Link} to={`/players/${s.player.id}`} c="inherit" inherit>
+                      {s.player.name}
+                    </Anchor>
+                  </Table.Td>
                   <Table.Td ta="right">{s.wins}</Table.Td>
                   <Table.Td ta="right">{s.plays}</Table.Td>
                 </Table.Tr>

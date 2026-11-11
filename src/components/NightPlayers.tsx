@@ -1,5 +1,6 @@
-import { Group, Pill, Select, Stack, Text } from '@mantine/core';
+import { Anchor, Group, Pill, Select, Stack, Text } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { useAddGameNightPlayer, useRemoveGameNightPlayer } from '../api/game-nights';
 import { playersQuery } from '../api/players';
 import type { GameNight } from '../api/types';
@@ -32,7 +33,9 @@ export default function NightPlayers({ night }: { night: GameNight }) {
       <Group gap="xs">
         {night.players.map((player) => (
           <Pill key={player.id} size="md" withRemoveButton onRemove={() => handleRemove(player.id, player.name)}>
-            {player.name}
+            <Anchor component={Link} to={`/players/${player.id}`} c="inherit" inherit>
+              {player.name}
+            </Anchor>
           </Pill>
         ))}
         {options.length > 0 && (

@@ -110,9 +110,9 @@ function PlayerDetails({ player }: { player: Player }) {
             >
               <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
                 {rating.boardGame.thumbnailUrl && <Avatar src={rating.boardGame.thumbnailUrl} radius="sm" size="sm" alt="" />}
-                <Text fw={500} truncate>
+                <Anchor component={Link} to={`/board-games/${rating.boardGame.id}`} c="inherit" fw={500} truncate>
                   {rating.boardGame.title}
-                </Text>
+                </Anchor>
               </Group>
               <Group gap="xs" wrap="nowrap">
                 <Rating
