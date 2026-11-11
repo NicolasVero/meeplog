@@ -21,7 +21,7 @@ export default function App() {
   return (
     <AppShell header={{ height: 56 }} padding="md">
       <AppShell.Header className={classes.header}>
-        <Container size="md" h="100%">
+        <Container size="xl" h="100%">
           <Group h="100%" justify="space-between">
             <Link to="/" className={classes.logo} aria-label="Meeplog, accueil">
               <Image src="/logo-on-light.svg" alt="" h={32} w="auto" darkHidden />
@@ -42,7 +42,7 @@ export default function App() {
       </AppShell.Header>
 
       <AppShell.Main className={classes.main}>
-        <Container size="md">
+        <Container size="xl">
           <Routes>
             <Route index element={<HomePage />} />
             <Route path="game-nights" element={<GameNightsPage />} />

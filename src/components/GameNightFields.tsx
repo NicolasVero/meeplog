@@ -13,7 +13,7 @@ export default function GameNightFields({ form }: { form: FieldsForm }) {
   return (
     <>
       <DateInput label="Date" withAsterisk valueFormat="DD/MM/YYYY" key={form.key('date')} {...form.getInputProps('date')} />
-      <TextInput label="Lieu" placeholder="Chez Paul" key={form.key('location')} {...form.getInputProps('location')} />
+      <TextInput label="Lieu" key={form.key('location')} {...form.getInputProps('location')} />
       <Textarea label="Notes" autosize minRows={2} key={form.key('notes')} {...form.getInputProps('notes')} />
     </>
   );
