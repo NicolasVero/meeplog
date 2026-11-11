@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
+import { boardGameKeys } from './board-games';
 import { playerKeys } from './players';
 import type { Rating } from './types';
 
@@ -18,7 +19,10 @@ export function useRateGame(playerId: number) {
   return useMutation({
     mutationFn: ({ boardGameId, value }: { boardGameId: number; value: number }) =>
       api.put<Rating>(`/players/${playerId}/ratings/${boardGameId}`, { value }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ratingKeys.byPlayer(playerId) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ratingKeys.byPlayer(playerId) });
+      queryClient.invalidateQueries({ queryKey: boardGameKeys.all });
+    },
   });
 }
 
@@ -26,6 +30,9 @@ export function useDeleteRating(playerId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (boardGameId: number) => api.delete(`/players/${playerId}/ratings/${boardGameId}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ratingKeys.byPlayer(playerId) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ratingKeys.byPlayer(playerId) });
+      queryClient.invalidateQueries({ queryKey: boardGameKeys.all });
+    },
   });
 }

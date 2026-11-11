@@ -36,3 +36,8 @@ export async function patchBoardGame(req: Request, res: Response) {
 
   return res.json(boardGame);
 }
+
+export async function getBoardGameStats(req: Request, res: Response) {
+  const stats = await boardGameService.findBoardGameStats(Number(req.params.id));
+  return res.json(stats);
+}

@@ -59,3 +59,6 @@ DELETE {{base}}/board-games/1
 
 ### Jeu inexistant → 404
 GET {{base}}/board-games/999999
+
+### Statistiques d'un jeu (notes, soirées, joueurs)
+GET {{base}}/board-games/1/stats

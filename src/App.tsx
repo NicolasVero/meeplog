@@ -5,6 +5,7 @@ import CreateGameNightsPage from './pages/CreateGameNightsPage';
 import GameNightPage from './pages/GameNightPage';
 import EditGameNightPage from './pages/EditGameNightPage';
 import BoardGamesPage from './pages/BoardGamesPage';
+import BoardGamePage from './pages/BoardGamePage';
 import PlayersPage from './pages/PlayersPage';
 import PlayerPage from './pages/PlayerPage';
 import HomePage from './pages/HomePage';
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="game-nights/:id" element={<GameNightPage />} />
             <Route path="game-nights/:id/edit" element={<EditGameNightPage />} />
             <Route path="board-games" element={<BoardGamesPage />} />
+            <Route path="board-games/:id" element={<BoardGamePage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="players/:id" element={<PlayerPage />} />
             <Route path="*" element={<NotFoundPage />} />

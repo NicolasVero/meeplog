@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
-import type { BoardGame, CreateBoardGameInput, UpdateBoardGameInput } from './types';
+import type { BoardGame, BoardGameStats, CreateBoardGameInput, UpdateBoardGameInput } from './types';
 
 export const boardGameKeys = {
   all: ['board-games'] as const,
@@ -17,6 +17,12 @@ export const boardGameQuery = (id: number) =>
   queryOptions({
     queryKey: boardGameKeys.detail(id),
     queryFn: () => api.get<BoardGame>(`/board-games/${id}`),
+  });
+
+export const boardGameStatsQuery = (id: number) =>
+  queryOptions({
+    queryKey: [...boardGameKeys.detail(id), 'stats'],
+    queryFn: () => api.get<BoardGameStats>(`/board-games/${id}/stats`),
   });
 
 export function useCreateBoardGame() {

@@ -76,3 +76,10 @@ export type UpdateGameNightInput = Partial<Omit<CreateGameNightInput, 'playerIds
 
 // A player's personal rating of a board game, from 1 to 10
 export type Rating = { value: number; updatedAt: string; boardGame: BoardGame };
+
+export type BoardGameStats = {
+  averageRating: number | null;
+  ratings: { value: number; updatedAt: string; player: Player }[];
+  gameNights: { id: number; date: string; location: string | null; playCount: number }[];
+  players: { player: Player; plays: number; wins: number }[];
+};

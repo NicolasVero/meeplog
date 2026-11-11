@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { ActionIcon, Anchor, Avatar, Button, Group, Modal, Stack, Table, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { bggUrl } from '../api/bgg';
@@ -71,7 +72,7 @@ export default function BoardGamesPage() {
                   <Group gap="sm" wrap="nowrap">
                     <Avatar src={game.thumbnailUrl} name={game.title} color="initials" radius="sm" size="md" />
                     <Stack gap={0}>
-                      <Text fw={500} size="sm">
+                      <Text fw={500} size="sm" component={Link} to={`/board-games/${game.id}`} td="none" c="inherit">
                         {game.title}
                       </Text>
                       <Text size="xs" c="dimmed">

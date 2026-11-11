@@ -8,6 +8,7 @@ const router = Router();
 
 router.get('/', boardGameController.getAllBoardGames);
 router.get('/:id', validateParams(idParamSchema), boardGameController.getBoardGameById);
+router.get('/:id/stats', validateParams(idParamSchema), boardGameController.getBoardGameStats);
 router.post('/', validateBody(createBoardGameSchema), boardGameController.postBoardGame);
 router.patch('/:id', validateParams(idParamSchema), validateBody(updateBoardGameSchema), boardGameController.patchBoardGame);
 router.delete('/:id', validateParams(idParamSchema), boardGameController.deleteBoardGame);
