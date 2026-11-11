@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCollectionIds, parseSearch, parseThings, parseXml, sortSearchResults } from './bgg.parser';
+import { parseCollectionIds, parseSearch, parseThings, parseXml, sortSearchResults } from '../../src/bgg/bgg.parser';
 
 // Trimmed-down copies of real XML API2 answers.
 

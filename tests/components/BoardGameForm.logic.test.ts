@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { boardGame } from '../test/fixtures';
-import { toFormValues, toInput, validate, type FormValues } from './BoardGameForm.logic';
+import { boardGame } from '../fixtures';
+import { toFormValues, toInput, validate, type FormValues } from '../../src/components/BoardGameForm.logic';
 
 const values = (overrides: Partial<FormValues> = {}): FormValues => ({ ...toFormValues(), title: 'Azul', ...overrides });
 

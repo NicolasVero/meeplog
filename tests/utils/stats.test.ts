@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { boardGame, play, player } from '../test/fixtures';
-import { mostPlayedGames, standings, winnersOf } from './stats';
+import { boardGame, play, player } from '../fixtures';
+import { mostPlayedGames, standings, winnersOf } from '../../src/utils/stats';
 
 const alice = player(1, 'Alice');
 const bob = player(2, 'Bob');

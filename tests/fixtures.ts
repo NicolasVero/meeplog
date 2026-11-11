@@ -1,4 +1,4 @@
-import type { BoardGame, Play, Player } from '../api/types';
+import type { BoardGame, Play, Player } from '../src/api/types';
 
 // Small builders so each test only spells out what matters to it.
 

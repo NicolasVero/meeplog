@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { boardGame, play, player } from '../test/fixtures';
-import { playedScores, toFormValues, toInput, validate } from './PlayForm.logic';
+import { boardGame, play, player } from '../fixtures';
+import { playedScores, toFormValues, toInput, validate } from '../../src/components/PlayForm.logic';
 
 const azul = boardGame({ id: 7, title: 'Azul', minPlayers: 2, maxPlayers: 4 });
 
