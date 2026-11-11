@@ -45,6 +45,7 @@ En dev, Vite redirige `/api/*` vers `http://localhost:4000` (voir `vite.config.t
 | `npm run dev` | Serveur de dev Vite |
 | `npm run build` | Vérification TypeScript + build de production |
 | `npm run lint` | ESLint |
+| `npm test` | Tests unitaires Vitest (aussi dans `server/`) ; `npm run test:watch` pour les relancer à chaque modification |
 | `server: npm run db:reset` | Réinitialise la base et relance le seed |
 
 Le dossier `server/requests` contient des requêtes `.http` pour tester l'API à la main.
