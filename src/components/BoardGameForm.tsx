@@ -14,73 +14,14 @@ import {
   TextInput,
   Textarea,
 } from '@mantine/core';
-import { useForm, type FormErrors } from '@mantine/form';
+import { useForm } from '@mantine/form';
 import { bggGameQuery, bggUrl, type BggSearchResult } from '../api/bgg';
 import { useCreateBoardGame, useUpdateBoardGame } from '../api/board-games';
-import type { BoardGame, CreateBoardGameInput } from '../api/types';
+import type { BoardGame } from '../api/types';
 import { notifyError, notifySuccess } from '../utils/feedback';
 import ApiErrorAlert from './ApiErrorAlert';
 import BggSearch from './BggSearch';
-
-/** BGG data that is not edited by hand, kept as-is while the game stays linked. */
-type BggLink = {
-  bggId: number;
-  thumbnailUrl: string | null;
-  imageUrl: string | null;
-  bggRating: number | null;
-};
-
-type FormValues = {
-  title: string;
-  minPlayers: number | '';
-  maxPlayers: number | '';
-  playingTime: number | '';
-  yearPublished: number | '';
-  description: string;
-  bgg: BggLink | null;
-};
-
-function toFormValues(game?: BoardGame): FormValues {
-  return {
-    title: game?.title ?? '',
-    minPlayers: game?.minPlayers ?? 2,
-    maxPlayers: game?.maxPlayers ?? 4,
-    playingTime: game?.playingTime ?? '',
-    yearPublished: game?.yearPublished ?? '',
-    description: game?.description ?? '',
-    bgg: game?.bggId
-      ? { bggId: game.bggId, thumbnailUrl: game.thumbnailUrl, imageUrl: game.imageUrl, bggRating: game.bggRating }
-      : null,
-  };
-}
-
-function validate(values: FormValues): FormErrors {
-  const errors: FormErrors = {};
-  if (!values.title.trim()) errors.title = 'Le titre est obligatoire';
-  if (values.minPlayers === '' || values.minPlayers < 1) errors.minPlayers = 'Au moins 1 joueur';
-  if (values.maxPlayers === '') errors.maxPlayers = 'Obligatoire';
-  else if (values.minPlayers !== '' && values.maxPlayers < values.minPlayers) {
-    errors.maxPlayers = 'Doit être supérieur ou égal au minimum';
-  }
-  return errors;
-}
-
-const orNull = (value: number | '') => (value === '' ? null : value);
-
-function toInput(values: FormValues): CreateBoardGameInput {
-  return {
-    title: values.title.trim(),
-    minPlayers: Number(values.minPlayers),
-    maxPlayers: Number(values.maxPlayers),
-    playingTime: orNull(values.playingTime),
-    yearPublished: orNull(values.yearPublished),
-    description: values.description.trim() || null,
-    bggId: values.bgg?.bggId ?? null,
-    thumbnailUrl: values.bgg?.thumbnailUrl ?? null,
-    imageUrl: values.bgg?.imageUrl ?? null,
-    bggRating: values.bgg?.bggRating ?? null,
-  };
-}
+import { toFormValues, toInput, validate, type FormValues } from './BoardGameForm.logic';
 
 interface Props {
   /** Edits this game when given, creates a new one otherwise. */
