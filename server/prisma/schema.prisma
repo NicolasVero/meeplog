@@ -15,6 +15,7 @@ model BoardGame {
   description String?
   createdAt   DateTime @default(now())
   plays       Play[]
+  ratings     Rating[]
 
   // BoardGameGeek data, null for games entered by hand
   bggId         Int?      @unique
@@ -32,6 +33,7 @@ model Player {
   createdAt  DateTime          @default(now())
   gameNights GameNightPlayer[]
   scores     PlayScore[]
+  ratings    Rating[]
 }
 
 model GameNight {
@@ -71,4 +73,16 @@ model PlayScore {
   player   Player @relation(fields: [playerId], references: [id], onDelete: Restrict)
 
   @@id([playId, playerId])
+}
+
+// A player's personal rating of a board game, from 1 to 10
+model Rating {
+  playerId    Int
+  boardGameId Int
+  value       Int
+  updatedAt   DateTime  @updatedAt
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  boardGame   BoardGame @relation(fields: [boardGameId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, boardGameId])
 }

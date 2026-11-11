@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { ActionIcon, Avatar, Button, Group, Modal, Paper, Stack, Text, Title } from '@mantine/core';
 import { playersQuery, useDeletePlayer } from '../api/players';
 import type { Player } from '../api/types';
@@ -55,7 +56,9 @@ export default function PlayersPage() {
             >
               <Group gap="sm">
                 <Avatar name={player.name} color="initials" size="sm" />
-                <Text fw={500}>{player.name}</Text>
+                <Text fw={500} component={Link} to={`/players/${player.id}`} td="none" c="inherit">
+                  {player.name}
+                </Text>
               </Group>
               <Group gap={4} wrap="nowrap">
                 <ActionIcon variant="subtle" aria-label={`Modifier ${player.name}`} onClick={() => setEditing(player)}>

@@ -59,3 +59,23 @@ POST {{base}}/players
 Content-Type: application/json
 
 { "name": "Alice",
+
+### --- Notes ---
+
+### Notes du joueur 1
+GET {{base}}/players/1/ratings
+
+### Noter le jeu 1 (1 à 10, crée ou remplace)
+PUT {{base}}/players/1/ratings/1
+Content-Type: application/json
+
+{ "value": 8 }
+
+### Note hors bornes → 400
+PUT {{base}}/players/1/ratings/1
+Content-Type: application/json
+
+{ "value": 11 }
+
+### Supprimer la note → 204
+DELETE {{base}}/players/1/ratings/1

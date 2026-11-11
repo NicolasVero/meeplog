@@ -6,6 +6,7 @@ import GameNightPage from './pages/GameNightPage';
 import EditGameNightPage from './pages/EditGameNightPage';
 import BoardGamesPage from './pages/BoardGamesPage';
 import PlayersPage from './pages/PlayersPage';
+import PlayerPage from './pages/PlayerPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ColorSchemeToggle from './components/ColorSchemeToggle';
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="game-nights/:id/edit" element={<EditGameNightPage />} />
             <Route path="board-games" element={<BoardGamesPage />} />
             <Route path="players" element={<PlayersPage />} />
+            <Route path="players/:id" element={<PlayerPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Container>
