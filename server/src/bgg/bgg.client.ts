@@ -1,5 +1,5 @@
-import { XMLParser } from 'fast-xml-parser';
 import { HttpError } from '../common/errors';
+import { parseXml } from './bgg.parser';
 
 // BGG XML API2. The domain must be boardgamegeek.com WITHOUT "www".
 const BASE_URL = 'https://boardgamegeek.com/xmlapi2';
@@ -7,14 +7,6 @@ const BASE_URL = 'https://boardgamegeek.com/xmlapi2';
 // BGG asks clients to be gentle: keep at least this delay between two requests.
 const MIN_DELAY_MS = 2500;
 const MAX_ATTEMPTS = 6;
-
-const parser = new XMLParser({
-  ignoreAttributes: false,
-  attributeNamePrefix: '',
-  htmlEntities: true, // descriptions contain &#10;, &mdash;, …
-  // Elements that can appear once or many times are always parsed as arrays.
-  isArray: (name) => ['item', 'name', 'link'].includes(name),
-});
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,7 +40,7 @@ export function bggGet(path: string, params: Record<string, string | number>): P
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       const res = await fetchOnce(url);
 
-      if (res.status === 200) return parser.parse(await res.text());
+      if (res.status === 200) return parseXml(await res.text());
 
       if (res.status === 401 || res.status === 403) {
         throw new HttpError(502, 'BGG rejected the API token');

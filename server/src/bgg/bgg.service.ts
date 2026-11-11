@@ -1,38 +1,20 @@
 import prisma from '../prisma';
 import { HttpError } from '../common/errors';
 import { bggGet } from './bgg.client';
-import { parseCollectionIds, parseSearch, parseThings, type BggGame, type BggSearchResult } from './bgg.parser';
+import {
+  parseCollectionIds,
+  parseSearch,
+  parseThings,
+  sortSearchResults,
+  type BggGame,
+  type BggSearchResult,
+} from './bgg.parser';
 
 const THINGS_PER_REQUEST = 20; // BGG limit for /thing
 
-function normalize(s: string) {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .trim();
-}
-
-/** BGG returns search results unordered: rank exact, then prefix, then other matches. */
-function rank(query: string, result: BggSearchResult) {
-  const q = normalize(query);
-  const name = normalize(result.name);
-  if (name === q) return 0;
-  if (name.startsWith(q)) return 1;
-  if (name.includes(q)) return 2;
-  return 3;
-}
-
 export async function searchGames(query: string, limit = 20): Promise<BggSearchResult[]> {
   const results = parseSearch(await bggGet('search', { query, type: 'boardgame' }));
-  return results
-    .sort(
-      (a, b) =>
-        rank(query, a) - rank(query, b) ||
-        a.name.length - b.name.length ||
-        (b.yearPublished ?? 0) - (a.yearPublished ?? 0),
-    )
-    .slice(0, limit);
+  return sortSearchResults(query, results).slice(0, limit);
 }
 
 export async function fetchGames(ids: number[]): Promise<BggGame[]> {

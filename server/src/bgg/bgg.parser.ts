@@ -1,4 +1,17 @@
+import { XMLParser } from 'fast-xml-parser';
 import { z } from 'zod';
+
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  htmlEntities: true, // descriptions contain &#10;, &mdash;, …
+  // Elements that can appear once or many times are always parsed as arrays.
+  isArray: (name) => ['item', 'name', 'link'].includes(name),
+});
+
+export function parseXml(xml: string): unknown {
+  return xmlParser.parse(xml);
+}
 
 // Zod schemas for the parsed XML (attributes are flattened, values are strings).
 // Everything optional is coerced defensively: BGG data is user-maintained.
@@ -40,9 +53,7 @@ const thingDocSchema = z.object({
           minplayers: optionalNumber,
           maxplayers: optionalNumber,
           playingtime: optionalNumber,
-          statistics: z
-            .object({ ratings: z.object({ average: valueAttr.optional() }).optional() })
-            .optional(),
+          statistics: z.object({ ratings: z.object({ average: valueAttr.optional() }).optional() }).optional(),
         }),
       )
       .optional(),
@@ -112,4 +123,31 @@ export function parseThings(doc: unknown): BggGame[] {
 export function parseCollectionIds(doc: unknown): number[] {
   const items = collectionDocSchema.parse(doc).items.item ?? [];
   return [...new Set(items.map((item) => Number(item.objectid)))];
+}
+
+const COMBINING_ACCENTS = new RegExp('[\\u0300-\\u036f]', 'g');
+
+/** Lowercase, without accents: "Chloé" and "chloe" compare equal. */
+function normalize(s: string) {
+  return s.toLowerCase().normalize('NFD').replace(COMBINING_ACCENTS, '').trim();
+}
+
+/** 0 = exact title, 1 = title starts with the query, 2 = contains it, 3 = other match. */
+function rank(query: string, name: string) {
+  const q = normalize(query);
+  const n = normalize(name);
+  if (n === q) return 0;
+  if (n.startsWith(q)) return 1;
+  if (n.includes(q)) return 2;
+  return 3;
+}
+
+/** BGG returns search results unordered: closest titles first, shorter and newer ones on ties. */
+export function sortSearchResults(query: string, results: BggSearchResult[]): BggSearchResult[] {
+  return [...results].sort(
+    (a, b) =>
+      rank(query, a.name) - rank(query, b.name) ||
+      a.name.length - b.name.length ||
+      (b.yearPublished ?? 0) - (a.yearPublished ?? 0),
+  );
 }
