@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
-import { ActionIcon, Anchor, Avatar, Group, Paper, Rating, Select, Stack, Table, Tabs, Text, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Avatar, Group, Paper, Select, Stack, Table, Tabs, Text, Title } from '@mantine/core';
 import { boardGamesQuery } from '../api/board-games';
 import { playedGamesQuery, playerQuery } from '../api/players';
 import { playerRatingsQuery, useDeleteRating, useRateGame } from '../api/ratings';
 import type { Player, Rating as GameRating } from '../api/types';
 import EmptyState from '../components/EmptyState';
+import RatingInput from '../components/RatingInput';
 import { QueryState } from '../components/QueryState';
 import { formatShortDate } from '../utils/dates';
 import { notifyError, notifySuccess } from '../utils/feedback';
@@ -28,6 +29,8 @@ function PlayerDetails({ player }: { player: Player }) {
   const rateGame = useRateGame(player.id);
   const deleteRating = useDeleteRating(player.id);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  // Bumped after each new rating to remount the stars, clearing their hover state.
+  const [newRatingKey, setNewRatingKey] = useState(0);
 
   const ratings = ratingsQuery.data ?? [];
   const ratedIds = new Set(ratings.map((r) => r.boardGame.id));
@@ -94,13 +97,16 @@ function PlayerDetails({ player }: { player: Player }) {
                   <Text size="sm" fw={500}>
                     Note
                   </Text>
-                  <Rating
+                  <RatingInput
+                    key={newRatingKey}
                     count={MAX_RATING}
                     value={0}
                     readOnly={selectedGameId === null || rateGame.isPending}
-                    onChange={(value) =>
-                      selectedGameId !== null && rate(Number(selectedGameId), value, () => setSelectedGameId(null))
-                    }
+                    onChange={(value) => {
+                      if (selectedGameId === null) return;
+                      setNewRatingKey((k) => k + 1);
+                      rate(Number(selectedGameId), value, () => setSelectedGameId(null));
+                    }}
                   />
                 </Stack>
               </Group>
@@ -130,15 +136,12 @@ function PlayerDetails({ player }: { player: Player }) {
                       </Anchor>
                     </Group>
                     <Group gap="xs" wrap="nowrap">
-                      <Rating
+                      <RatingInput
                         count={MAX_RATING}
                         value={rating.value}
                         size="sm"
                         onChange={(value) => rate(rating.boardGame.id, value)}
                       />
-                      <Text size="sm" c="dimmed" w={40} ta="right">
-                        {rating.value}/{MAX_RATING}
-                      </Text>
                       <ActionIcon
                         variant="subtle"
                         color="red"
