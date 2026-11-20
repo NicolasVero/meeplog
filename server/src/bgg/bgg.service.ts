@@ -2,7 +2,7 @@ import prisma from '../prisma';
 import { HttpError } from '../common/errors';
 import { bggGet } from './bgg.client';
 import {
-  parseCollectionIds,
+  parseCollection,
   parseSearch,
   parseThings,
   sortSearchResults,
@@ -52,8 +52,13 @@ export async function syncCollection(username: string): Promise<SyncReport> {
     subtype: 'boardgame',
     excludesubtype: 'boardgameexpansion',
   });
-  const ids = parseCollectionIds(doc);
-  const games = await fetchGames(ids);
+  const collection = parseCollection(doc);
+  const collectionNames = new Map(collection.map((c) => [c.bggId, c.name]));
+  // Prefer the name chosen in the BGG collection (e.g. French title) over the primary name.
+  const games = (await fetchGames(collection.map((c) => c.bggId))).map((game) => ({
+    ...game,
+    title: collectionNames.get(game.bggId) ?? game.title,
+  }));
 
   let created = 0;
   let updated = 0;

@@ -62,7 +62,16 @@ const thingDocSchema = z.object({
 
 const collectionDocSchema = z.object({
   items: z.object({
-    item: z.array(z.object({ objectid: z.string() })).optional(),
+    item: z
+      .array(
+        z.object({
+          objectid: z.string(),
+          // <name sortindex="1">…</name>: the name the user picked for their collection
+          // (e.g. the French title), which may differ from the primary name.
+          name: z.array(z.object({ '#text': z.union([z.string(), z.number()]).optional() })).optional(),
+        }),
+      )
+      .optional(),
   }),
 });
 
@@ -120,9 +129,19 @@ export function parseThings(doc: unknown): BggGame[] {
   });
 }
 
-export function parseCollectionIds(doc: unknown): number[] {
+export type BggCollectionItem = { bggId: number; name: string | null };
+
+/** Owned games, once each, with the name shown in the user's collection. */
+export function parseCollection(doc: unknown): BggCollectionItem[] {
   const items = collectionDocSchema.parse(doc).items.item ?? [];
-  return [...new Set(items.map((item) => Number(item.objectid)))];
+  const byId = new Map<number, BggCollectionItem>();
+  for (const item of items) {
+    const bggId = Number(item.objectid);
+    if (byId.has(bggId)) continue;
+    const text = item.name?.[0]?.['#text'];
+    byId.set(bggId, { bggId, name: text === undefined ? null : String(text).trim() || null });
+  }
+  return [...byId.values()];
 }
 
 const COMBINING_ACCENTS = new RegExp('[\\u0300-\\u036f]', 'g');

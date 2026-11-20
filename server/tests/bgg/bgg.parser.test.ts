@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseCollectionIds, parseSearch, parseThings, parseXml, sortSearchResults } from '../../src/bgg/bgg.parser';
+import { parseCollection, parseSearch, parseThings, parseXml, sortSearchResults } from '../../src/bgg/bgg.parser';
 
 // Trimmed-down copies of real XML API2 answers.
 
@@ -91,14 +91,17 @@ describe('parseThings', () => {
   });
 });
 
-describe('parseCollectionIds', () => {
+describe('parseCollection', () => {
   it('returns each owned game once', () => {
     const xml = `<items totalitems="3">
       <item objecttype="thing" objectid="230802" subtype="boardgame" collid="1"><name sortindex="1">Azul</name></item>
-      <item objecttype="thing" objectid="9209" subtype="boardgame" collid="2"><name sortindex="1">Ticket to Ride</name></item>
+      <item objecttype="thing" objectid="9209" subtype="boardgame" collid="2"><name sortindex="5">Les Aventuriers du Rail</name></item>
       <item objecttype="thing" objectid="230802" subtype="boardgame" collid="3"><name sortindex="1">Azul</name></item>
     </items>`;
-    expect(parseCollectionIds(parseXml(xml))).toEqual([230802, 9209]);
+    expect(parseCollection(parseXml(xml))).toEqual([
+      { bggId: 230802, name: 'Azul' },
+      { bggId: 9209, name: 'Les Aventuriers du Rail' },
+    ]);
   });
 });
 
