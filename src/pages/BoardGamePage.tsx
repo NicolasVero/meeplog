@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
-import { Anchor, Avatar, Group, Image, Paper, Rating, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
+import { Anchor, Avatar, Badge, Group, Image, Paper, Rating, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
 import { boardGameQuery, boardGameStatsQuery } from '../api/board-games';
 import type { BoardGame, BoardGameStats } from '../api/types';
 import EmptyState from '../components/EmptyState';
@@ -42,7 +42,9 @@ function BoardGameDetails({ game, stats }: { game: BoardGame; stats: BoardGameSt
     game.yearPublished,
     `${game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers}–${game.maxPlayers}`} joueurs`,
     game.playingTime && `${game.playingTime} min`,
+    game.scoringMode === 'LOWEST_WINS' && 'le plus bas score gagne',
   ].filter(Boolean);
+  const mostWins = Math.max(0, ...stats.players.map((p) => p.wins));
 
   return (
     <Stack>
@@ -135,9 +137,16 @@ function BoardGameDetails({ game, stats }: { game: BoardGame; stats: BoardGameSt
                 {stats.players.map(({ player, plays, wins }) => (
                   <Table.Tr key={player.id}>
                     <Table.Td>
-                      <Anchor component={Link} to={`/players/${player.id}`} c="inherit" size="sm">
-                        {player.name}
-                      </Anchor>
+                      <Group gap="xs" wrap="nowrap">
+                        <Anchor component={Link} to={`/players/${player.id}`} c="inherit" size="sm">
+                          {player.name}
+                        </Anchor>
+                        {wins > 0 && wins === mostWins && (
+                          <Badge size="xs" color="yellow" variant="light">
+                            Champion
+                          </Badge>
+                        )}
+                      </Group>
                     </Table.Td>
                     <Table.Td ta="right">{plays}</Table.Td>
                     <Table.Td ta="right">{wins}</Table.Td>

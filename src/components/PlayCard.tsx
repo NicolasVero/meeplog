@@ -9,8 +9,9 @@ type Props = {
 };
 
 export default function PlayCard({ play, onEdit, onDelete }: Props) {
-  // Scores arrive sorted by descending score from the API, sort again to be safe.
-  const scores = [...play.scores].sort((a, b) => b.score - a.score);
+  // Best score first: the lowest one for games where the lowest score wins.
+  const lowestWins = play.boardGame.scoringMode === 'LOWEST_WINS';
+  const scores = [...play.scores].sort((a, b) => (lowestWins ? a.score - b.score : b.score - a.score));
   const winners = new Set(winnersOf(play));
 
   return (

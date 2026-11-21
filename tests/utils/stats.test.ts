@@ -19,6 +19,21 @@ describe('winnersOf', () => {
     ).toEqual([bob.id]);
   });
 
+  it('returns the player with the lowest score when the lowest score wins', () => {
+    expect(
+      winnersOf(
+        play(
+          [
+            [alice, 12],
+            [bob, 30],
+            [chloe, 7],
+          ],
+          boardGame({ scoringMode: 'LOWEST_WINS' }),
+        ),
+      ),
+    ).toEqual([chloe.id]);
+  });
+
   it('returns every player tied for first place', () => {
     expect(
       winnersOf(

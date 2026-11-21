@@ -1,5 +1,8 @@
 // Mirrors the server Zod schemas. Dates are ISO strings once serialized to JSON.
 
+// How the winner of a play is decided from the scores
+export type ScoringMode = 'HIGHEST_WINS' | 'LOWEST_WINS';
+
 export type BoardGame = {
   id: number;
   title: string;
@@ -15,6 +18,7 @@ export type BoardGame = {
   imageUrl: string | null;
   bggRating: number | null;
   bggSyncedAt: string | null;
+  scoringMode: ScoringMode;
 };
 
 export type CreateBoardGameInput = {
@@ -22,6 +26,7 @@ export type CreateBoardGameInput = {
   minPlayers: number;
   maxPlayers: number;
   description?: string | null;
+  scoringMode?: ScoringMode;
   bggId?: number | null;
   yearPublished?: number | null;
   playingTime?: number | null;
@@ -78,6 +83,11 @@ export type UpdateGameNightInput = Partial<Omit<CreateGameNightInput, 'playerIds
 export type Rating = { value: number; updatedAt: string; boardGame: BoardGame };
 
 export type PlayedGame = { boardGame: BoardGame; plays: number; wins: number; lastPlayedAt: string };
+
+export type LeaderboardEntry = { player: Player; plays: number; wins: number; winRate: number };
+
+// Head-to-head record against one opponent: plays shared, finished ahead, behind or level.
+export type Rival = { opponent: Player; plays: number; wins: number; losses: number; ties: number };
 
 export type BoardGameStats = {
   averageRating: number | null;

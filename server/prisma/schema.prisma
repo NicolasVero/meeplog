@@ -8,14 +8,15 @@ datasource db {
 }
 
 model BoardGame {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   title       String
   minPlayers  Int
   maxPlayers  Int
   description String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime    @default(now())
   plays       Play[]
   ratings     Rating[]
+  scoringMode ScoringMode @default(HIGHEST_WINS)
 
   // BoardGameGeek data, null for games entered by hand
   bggId         Int?      @unique
@@ -85,4 +86,10 @@ model Rating {
   boardGame   BoardGame @relation(fields: [boardGameId], references: [id], onDelete: Cascade)
 
   @@id([playerId, boardGameId])
+}
+
+// How the winner of a play is decided from the scores
+enum ScoringMode {
+  HIGHEST_WINS
+  LOWEST_WINS
 }

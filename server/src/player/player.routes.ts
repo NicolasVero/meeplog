@@ -9,12 +9,15 @@ import { ratingParamsSchema, upsertRatingSchema } from '../rating/rating.schema'
 const router = Router();
 
 router.get('/', playerController.getAllPlayers);
+// Before '/:id' so that 'leaderboard' is not read as an id.
+router.get('/leaderboard', playerController.getLeaderboard);
 router.get('/:id', validateParams(idParamSchema), playerController.getPlayerById);
 router.post('/', validateBody(createPlayerSchema), playerController.postPlayer);
 router.patch('/:id', validateParams(idParamSchema), validateBody(updatePlayerSchema), playerController.patchPlayer);
 router.delete('/:id', validateParams(idParamSchema), playerController.deletePlayer);
 
 router.get('/:id/games', validateParams(idParamSchema), playerController.getPlayedGames);
+router.get('/:id/rivals', validateParams(idParamSchema), playerController.getRivals);
 router.get('/:id/ratings', validateParams(idParamSchema), ratingController.getPlayerRatings);
 router.put(
   '/:id/ratings/:boardGameId',

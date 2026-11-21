@@ -32,6 +32,7 @@ describe('toInput', () => {
       playingTime: null,
       yearPublished: null,
       description: null,
+      scoringMode: 'HIGHEST_WINS',
       bggId: null,
       thumbnailUrl: null,
       imageUrl: null,

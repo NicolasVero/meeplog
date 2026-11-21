@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { ActionIcon, Anchor, Avatar, Group, Paper, Select, Stack, Table, Tabs, Text, Title } from '@mantine/core';
 import { boardGamesQuery } from '../api/board-games';
-import { playedGamesQuery, playerQuery } from '../api/players';
+import { playedGamesQuery, playerQuery, rivalsQuery } from '../api/players';
 import { playerRatingsQuery, useDeleteRating, useRateGame } from '../api/ratings';
 import type { Player, Rating as GameRating } from '../api/types';
 import EmptyState from '../components/EmptyState';
@@ -71,11 +71,16 @@ function PlayerDetails({ player }: { player: Player }) {
       <Tabs defaultValue="played" keepMounted={false}>
         <Tabs.List>
           <Tabs.Tab value="played">Jeux joués</Tabs.Tab>
+          <Tabs.Tab value="rivals">Face-à-face</Tabs.Tab>
           <Tabs.Tab value="ratings">Notes{ratings.length > 0 && ` (${ratings.length})`}</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="played" pt="md">
           <PlayedGames playerId={player.id} ratings={ratings} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="rivals" pt="md">
+          <Rivals playerId={player.id} />
         </Tabs.Panel>
 
         <Tabs.Panel value="ratings" pt="md">
@@ -199,6 +204,55 @@ function PlayedGames({ playerId, ratings }: { playerId: number; ratings: GameRat
               <Table.Td ta="right">{ratingByGame.has(boardGame.id) ? `${ratingByGame.get(boardGame.id)}/10` : '—'}</Table.Td>
             </Table.Tr>
           ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  );
+}
+
+/** Head-to-head record: in plays shared with each opponent, who finished ahead. */
+function Rivals({ playerId }: { playerId: number }) {
+  const query = useQuery(rivalsQuery(playerId));
+
+  if (!query.data) return <QueryState query={query} />;
+  if (query.data.length === 0) return <EmptyState message="Aucune partie jouée contre un autre joueur." />;
+
+  return (
+    <Table.ScrollContainer minWidth={480}>
+      <Table>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Adversaire</Table.Th>
+            <Table.Th ta="right">Parties</Table.Th>
+            <Table.Th ta="right">Devant</Table.Th>
+            <Table.Th ta="right">Derrière</Table.Th>
+            <Table.Th ta="right">Égalités</Table.Th>
+            <Table.Th ta="right">Bilan</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {query.data.map(({ opponent, plays, wins, losses, ties }) => {
+            const balance = wins - losses;
+            return (
+              <Table.Tr key={opponent.id}>
+                <Table.Td>
+                  <Group gap="sm" wrap="nowrap">
+                    <Avatar name={opponent.name} color="initials" size="sm" />
+                    <Anchor component={Link} to={`/players/${opponent.id}`} c="inherit" fw={500} size="sm">
+                      {opponent.name}
+                    </Anchor>
+                  </Group>
+                </Table.Td>
+                <Table.Td ta="right">{plays}</Table.Td>
+                <Table.Td ta="right">{wins}</Table.Td>
+                <Table.Td ta="right">{losses}</Table.Td>
+                <Table.Td ta="right">{ties}</Table.Td>
+                <Table.Td ta="right" fw={600} c={balance > 0 ? 'teal' : balance < 0 ? 'red' : 'dimmed'}>
+                  {balance > 0 ? `+${balance}` : balance}
+                </Table.Td>
+              </Table.Tr>
+            );
+          })}
         </Table.Tbody>
       </Table>
     </Table.ScrollContainer>

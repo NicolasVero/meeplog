@@ -8,6 +8,7 @@ import BoardGamesPage from './pages/BoardGamesPage';
 import BoardGamePage from './pages/BoardGamePage';
 import PlayersPage from './pages/PlayersPage';
 import PlayerPage from './pages/PlayerPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ColorSchemeToggle from './components/ColorSchemeToggle';
@@ -17,6 +18,7 @@ const links = [
   { to: '/game-nights', label: 'Soirées' },
   { to: '/board-games', label: 'Jeux' },
   { to: '/players', label: 'Joueurs' },
+  { to: '/leaderboard', label: 'Classement' },
 ];
 
 export default function App() {
@@ -55,6 +57,7 @@ export default function App() {
             <Route path="board-games/:id" element={<BoardGamePage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="players/:id" element={<PlayerPage />} />
+            <Route path="leaderboard" element={<LeaderboardPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Container>

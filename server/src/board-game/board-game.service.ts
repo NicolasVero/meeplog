@@ -1,5 +1,6 @@
 import prisma from '../prisma';
 import { HttpError } from '../common/errors';
+import { winningScore } from '../common/scoring';
 import type { BoardGame, CreateBoardGameInput, UpdateBoardGameInput } from './board-game.schema';
 
 export async function findAllBoardGames(limit?: number): Promise<BoardGame[]> {
@@ -58,6 +59,7 @@ export async function findBoardGameStats(id: number) {
   const boardGame = await prisma.boardGame.findUnique({
     where: { id },
     select: {
+      scoringMode: true,
       ratings: {
         select: { value: true, updatedAt: true, player: true },
         orderBy: [{ value: 'desc' }, { player: { name: 'asc' } }],
@@ -88,7 +90,7 @@ export async function findBoardGameStats(id: number) {
     night.playCount++;
     nights.set(night.id, night);
 
-    const best = Math.max(...play.scores.map((s) => s.score));
+    const best = winningScore(play.scores.map((s) => s.score), boardGame.scoringMode);
     for (const { player, score } of play.scores) {
       const entry = players.get(player.id) ?? { player, plays: 0, wins: 0 };
       entry.plays++;

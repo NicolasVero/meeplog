@@ -1,5 +1,5 @@
 import type { FormErrors } from '@mantine/form';
-import type { BoardGame, CreateBoardGameInput } from '../api/types';
+import type { BoardGame, CreateBoardGameInput, ScoringMode } from '../api/types';
 
 /** BGG data that is not edited by hand, kept as-is while the game stays linked. */
 export type BggLink = {
@@ -16,6 +16,7 @@ export type FormValues = {
   playingTime: number | '';
   yearPublished: number | '';
   description: string;
+  scoringMode: ScoringMode;
   bgg: BggLink | null;
 };
 
@@ -27,6 +28,7 @@ export function toFormValues(game?: BoardGame): FormValues {
     playingTime: game?.playingTime ?? '',
     yearPublished: game?.yearPublished ?? '',
     description: game?.description ?? '',
+    scoringMode: game?.scoringMode ?? 'HIGHEST_WINS',
     bgg: game?.bggId
       ? { bggId: game.bggId, thumbnailUrl: game.thumbnailUrl, imageUrl: game.imageUrl, bggRating: game.bggRating }
       : null,
@@ -54,6 +56,7 @@ export function toInput(values: FormValues): CreateBoardGameInput {
     playingTime: orNull(values.playingTime),
     yearPublished: orNull(values.yearPublished),
     description: values.description.trim() || null,
+    scoringMode: values.scoringMode,
     bggId: values.bgg?.bggId ?? null,
     thumbnailUrl: values.bgg?.thumbnailUrl ?? null,
     imageUrl: values.bgg?.imageUrl ?? null,

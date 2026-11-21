@@ -1,9 +1,10 @@
 import type { Play, Player } from '../api/types';
 
-/** Ids of the players with the highest score (several in case of a tie). */
+/** Ids of the players with the best score (several in case of a tie), highest or lowest depending on the game. */
 export function winnersOf(play: Play): number[] {
   if (play.scores.length === 0) return [];
-  const best = Math.max(...play.scores.map((s) => s.score));
+  const values = play.scores.map((s) => s.score);
+  const best = play.boardGame.scoringMode === 'LOWEST_WINS' ? Math.min(...values) : Math.max(...values);
   return play.scores.filter((s) => s.score === best).map((s) => s.player.id);
 }
 

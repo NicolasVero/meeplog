@@ -9,6 +9,7 @@ import {
   Image,
   NumberInput,
   Paper,
+  SegmentedControl,
   Stack,
   Text,
   TextInput,
@@ -45,6 +46,7 @@ export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
     try {
       const details = await queryClient.fetchQuery(bggGameQuery(result.bggId));
       form.setValues({
+        scoringMode: form.values.scoringMode,
         // Keep the name that was searched (often the French title) rather than BGG's primary name.
         title: result.name,
         minPlayers: details.minPlayers,
@@ -142,6 +144,19 @@ export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
             {...form.getInputProps('yearPublished')}
           />
         </Group>
+        <Stack gap={4}>
+          <Text size="sm" fw={500}>
+            Victoire
+          </Text>
+          <SegmentedControl
+            data={[
+              { value: 'HIGHEST_WINS', label: 'Le plus haut score gagne' },
+              { value: 'LOWEST_WINS', label: 'Le plus bas score gagne' },
+            ]}
+            key={form.key('scoringMode')}
+            {...form.getInputProps('scoringMode')}
+          />
+        </Stack>
         <Textarea
           label="Description"
           autosize

@@ -6,6 +6,7 @@ const boardGameBaseSchema = z.object({
   minPlayers: z.number().int().min(1),
   maxPlayers: z.number().int().min(1),
   description: z.string().nullish(),
+  scoringMode: z.enum(['HIGHEST_WINS', 'LOWEST_WINS']).optional(),
 
   // BoardGameGeek data (optional: games can still be entered by hand)
   bggId: z.number().int().positive().nullish(),
@@ -34,6 +35,7 @@ export const boardGameSchema = boardGameBaseSchema.extend({
   imageUrl: z.string().nullable(),
   bggRating: z.number().nullable(),
   bggSyncedAt: z.date().nullable(),
+  scoringMode: z.enum(['HIGHEST_WINS', 'LOWEST_WINS']),
 });
 
 export type CreateBoardGameInput = z.infer<typeof boardGameBaseSchema>;

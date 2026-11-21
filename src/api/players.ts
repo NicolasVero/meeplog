@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
-import type { CreatePlayerInput, PlayedGame, Player, UpdatePlayerInput } from './types';
+import type { CreatePlayerInput, LeaderboardEntry, PlayedGame, Player, Rival, UpdatePlayerInput } from './types';
 
 export const playerKeys = {
   all: ['players'] as const,
@@ -23,6 +23,18 @@ export const playedGamesQuery = (id: number) =>
   queryOptions({
     queryKey: [...playerKeys.detail(id), 'games'],
     queryFn: () => api.get<PlayedGame[]>(`/players/${id}/games`),
+  });
+
+export const leaderboardQuery = () =>
+  queryOptions({
+    queryKey: [...playerKeys.all, 'leaderboard'],
+    queryFn: () => api.get<LeaderboardEntry[]>('/players/leaderboard'),
+  });
+
+export const rivalsQuery = (id: number) =>
+  queryOptions({
+    queryKey: [...playerKeys.detail(id), 'rivals'],
+    queryFn: () => api.get<Rival[]>(`/players/${id}/rivals`),
   });
 
 export function useCreatePlayer() {

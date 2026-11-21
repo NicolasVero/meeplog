@@ -1,5 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
+import { gameNightKeys } from './game-nights';
+import { playerKeys } from './players';
 import type { BoardGame, BoardGameStats, CreateBoardGameInput, UpdateBoardGameInput } from './types';
 
 export const boardGameKeys = {
@@ -37,7 +39,12 @@ export function useUpdateBoardGame(id: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: UpdateBoardGameInput) => api.patch<BoardGame>(`/board-games/${id}`, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: boardGameKeys.all }),
+    onSuccess: () => {
+      // The scoring rule changes who won, so stats shown elsewhere are refreshed too.
+      for (const queryKey of [boardGameKeys.all, playerKeys.all, gameNightKeys.all]) {
+        queryClient.invalidateQueries({ queryKey });
+      }
+    },
   });
 }
 

@@ -41,3 +41,11 @@ export async function getPlayedGames(req: Request, res: Response) {
   const games = await playerService.findPlayedGames(Number(req.params.id));
   return res.json(games);
 }
+
+export async function getLeaderboard(req: Request, res: Response) {
+  return res.json(await playerService.findLeaderboard());
+}
+
+export async function getRivals(req: Request, res: Response) {
+  return res.json(await playerService.findRivals(Number(req.params.id)));
+}

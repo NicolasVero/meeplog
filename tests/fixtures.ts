@@ -21,6 +21,7 @@ export function boardGame(overrides: Partial<BoardGame> = {}): BoardGame {
     imageUrl: null,
     bggRating: null,
     bggSyncedAt: null,
+    scoringMode: 'HIGHEST_WINS',
     ...overrides,
   };
 }
