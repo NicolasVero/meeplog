@@ -1,12 +1,15 @@
 import { z } from 'zod';
 import { nonEmpty } from '../common/schemas';
 
+// How the winner of a play is decided (see common/scoring.ts).
+export const scoringModeSchema = z.enum(['HIGHEST_WINS', 'LOWEST_WINS', 'WINNER_ONLY', 'COOPERATIVE']);
+
 const boardGameBaseSchema = z.object({
   title: z.string().trim().min(1),
   minPlayers: z.number().int().min(1),
   maxPlayers: z.number().int().min(1),
   description: z.string().nullish(),
-  scoringMode: z.enum(['HIGHEST_WINS', 'LOWEST_WINS']).optional(),
+  scoringMode: scoringModeSchema.optional(),
 
   // BoardGameGeek data (optional: games can still be entered by hand)
   bggId: z.number().int().positive().nullish(),
@@ -35,7 +38,7 @@ export const boardGameSchema = boardGameBaseSchema.extend({
   imageUrl: z.string().nullable(),
   bggRating: z.number().nullable(),
   bggSyncedAt: z.date().nullable(),
-  scoringMode: z.enum(['HIGHEST_WINS', 'LOWEST_WINS']),
+  scoringMode: scoringModeSchema,
 });
 
 export type CreateBoardGameInput = z.infer<typeof boardGameBaseSchema>;

@@ -62,6 +62,34 @@ describe('winnersOf', () => {
   });
 });
 
+describe('winnersOf without scores', () => {
+  const marked = (game: Parameters<typeof play>[1], wonIds: number[]) => {
+    const p = play(
+      [
+        [alice, 0],
+        [bob, 0],
+        [chloe, 0],
+      ],
+      game,
+    );
+    return { ...p, scores: p.scores.map((s) => ({ ...s, score: null, won: wonIds.includes(s.player.id) })) };
+  };
+
+  it('returns the players marked as winners', () => {
+    expect(winnersOf(marked(boardGame({ scoringMode: 'WINNER_ONLY' }), [bob.id]))).toEqual([bob.id]);
+  });
+
+  it('returns the whole team of a won cooperative game, nobody when lost', () => {
+    const coop = boardGame({ scoringMode: 'COOPERATIVE' });
+    expect(winnersOf(marked(coop, [alice.id, bob.id, chloe.id]))).toHaveLength(3);
+    expect(winnersOf(marked(coop, []))).toEqual([]);
+  });
+
+  it('leaves cooperative games out of the standings', () => {
+    expect(standings([marked(boardGame({ scoringMode: 'COOPERATIVE' }), [alice.id, bob.id, chloe.id])])).toEqual([]);
+  });
+});
+
 describe('standings', () => {
   it('counts wins and plays per player, best first', () => {
     const result = standings([

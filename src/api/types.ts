@@ -1,7 +1,7 @@
 // Mirrors the server Zod schemas. Dates are ISO strings once serialized to JSON.
 
 // How the winner of a play is decided from the scores
-export type ScoringMode = 'HIGHEST_WINS' | 'LOWEST_WINS';
+export type ScoringMode = 'HIGHEST_WINS' | 'LOWEST_WINS' | 'WINNER_ONLY' | 'COOPERATIVE';
 
 export type BoardGame = {
   id: number;
@@ -45,7 +45,8 @@ export type Player = {
 export type CreatePlayerInput = { name: string };
 export type UpdatePlayerInput = Partial<CreatePlayerInput>;
 
-export type PlayScore = { player: Player; score: number };
+// score is null for games without scores; won is only meaningful for winner-only and cooperative games.
+export type PlayScore = { player: Player; score: number | null; won: boolean };
 
 export type Play = {
   id: number;
@@ -55,7 +56,7 @@ export type Play = {
   scores: PlayScore[];
 };
 
-export type ScoreInput = { playerId: number; score: number };
+export type ScoreInput = { playerId: number; score?: number | null; won?: boolean };
 export type CreatePlayInput = { gameNightId: number; boardGameId: number; scores: ScoreInput[] };
 export type UpdatePlayInput = Partial<Omit<CreatePlayInput, 'gameNightId'>>;
 
@@ -92,6 +93,8 @@ export type Rival = { opponent: Player; plays: number; wins: number; losses: num
 export type BoardGameStats = {
   averageRating: number | null;
   ratings: { value: number; updatedAt: string; player: Player }[];
+  // Cooperative games only: plays won by the team (null otherwise).
+  teamWins: number | null;
   gameNights: { id: number; date: string; location: string | null; playCount: number }[];
   players: { player: Player; plays: number; wins: number }[];
 };

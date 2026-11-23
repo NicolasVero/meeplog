@@ -9,7 +9,7 @@ import {
   Image,
   NumberInput,
   Paper,
-  SegmentedControl,
+  Select,
   Stack,
   Text,
   TextInput,
@@ -20,6 +20,7 @@ import { bggGameQuery, bggUrl, type BggSearchResult } from '../api/bgg';
 import { useCreateBoardGame, useUpdateBoardGame } from '../api/board-games';
 import type { BoardGame } from '../api/types';
 import { notifyError, notifySuccess } from '../utils/feedback';
+import { SCORING_MODES } from '../utils/scoring';
 import ApiErrorAlert from './ApiErrorAlert';
 import BggSearch from './BggSearch';
 import { toFormValues, toInput, validate, type FormValues } from './BoardGameForm.logic';
@@ -144,19 +145,14 @@ export default function BoardGameForm({ game, onSuccess, onCancel }: Props) {
             {...form.getInputProps('yearPublished')}
           />
         </Group>
-        <Stack gap={4}>
-          <Text size="sm" fw={500}>
-            Victoire
-          </Text>
-          <SegmentedControl
-            data={[
-              { value: 'HIGHEST_WINS', label: 'Le plus haut score gagne' },
-              { value: 'LOWEST_WINS', label: 'Le plus bas score gagne' },
-            ]}
-            key={form.key('scoringMode')}
-            {...form.getInputProps('scoringMode')}
-          />
-        </Stack>
+        <Select
+          label="Victoire"
+          description={SCORING_MODES.find((m) => m.value === form.values.scoringMode)?.description}
+          data={SCORING_MODES.map(({ value, label }) => ({ value, label }))}
+          allowDeselect={false}
+          key={form.key('scoringMode')}
+          {...form.getInputProps('scoringMode')}
+        />
         <Textarea
           label="Description"
           autosize

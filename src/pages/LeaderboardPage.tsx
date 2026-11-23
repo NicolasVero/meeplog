@@ -14,7 +14,8 @@ export default function LeaderboardPage() {
     <Stack>
       <Title order={1}>Classement</Title>
       <Text c="dimmed" size="sm">
-        Toutes soirées confondues. En cas d’égalité à la première place, chaque ex æquo compte une victoire.
+        Toutes soirées confondues, hors jeux coopératifs. En cas d’égalité à la première place, chaque ex æquo compte
+        une victoire.
       </Text>
 
       {!query.data ? (

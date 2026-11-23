@@ -35,6 +35,6 @@ export function play(scores: [Player, number][], game: BoardGame = boardGame()):
     gameNightId: 1,
     createdAt: '2026-01-01T20:00:00.000Z',
     boardGame: game,
-    scores: scores.map(([p, score]) => ({ player: p, score })),
+    scores: scores.map(([p, score]) => ({ player: p, score, won: false })),
   };
 }

@@ -6,6 +6,7 @@ import type { BoardGame, BoardGameStats } from '../api/types';
 import EmptyState from '../components/EmptyState';
 import { QueryState } from '../components/QueryState';
 import { formatLongDate } from '../utils/dates';
+import { isCompetitive, SCORING_MODES } from '../utils/scoring';
 
 export default function BoardGamePage() {
   const id = Number(useParams().id);
@@ -42,9 +43,10 @@ function BoardGameDetails({ game, stats }: { game: BoardGame; stats: BoardGameSt
     game.yearPublished,
     `${game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers}–${game.maxPlayers}`} joueurs`,
     game.playingTime && `${game.playingTime} min`,
-    game.scoringMode === 'LOWEST_WINS' && 'le plus bas score gagne',
+    game.scoringMode !== 'HIGHEST_WINS' && SCORING_MODES.find((m) => m.value === game.scoringMode)?.label.toLowerCase(),
   ].filter(Boolean);
-  const mostWins = Math.max(0, ...stats.players.map((p) => p.wins));
+  // No champion in cooperative games: everybody wins or loses together.
+  const mostWins = isCompetitive(game.scoringMode) ? Math.max(0, ...stats.players.map((p) => p.wins)) : 0;
 
   return (
     <Stack>
@@ -77,7 +79,11 @@ function BoardGameDetails({ game, stats }: { game: BoardGame; stats: BoardGameSt
         <StatTile
           label="Parties jouées"
           value={String(playCount)}
-          hint={`${stats.gameNights.length} soirée${stats.gameNights.length > 1 ? 's' : ''}`}
+          hint={
+            stats.teamWins !== null
+              ? `${stats.teamWins} victoire${stats.teamWins > 1 ? 's' : ''} d’équipe sur ${playCount}`
+              : `${stats.gameNights.length} soirée${stats.gameNights.length > 1 ? 's' : ''}`
+          }
         />
       </SimpleGrid>
 

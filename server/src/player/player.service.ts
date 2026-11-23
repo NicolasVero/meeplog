@@ -1,6 +1,6 @@
 import prisma from '../prisma';
 import { HttpError } from '../common/errors';
-import { compareScores, winningScore } from '../common/scoring';
+import { compareResults, toResults, winnerIds } from '../common/scoring';
 import type { Player, CreatePlayerInput, UpdatePlayerInput } from './player.schema';
 
 export async function findAllPlayers(limit?: number): Promise<Player[]> {
@@ -48,12 +48,11 @@ export async function findPlayedGames(id: number) {
     select: {
       scores: {
         select: {
-          score: true,
           play: {
             select: {
               boardGame: true,
               gameNight: { select: { date: true } },
-              scores: { select: { score: true } },
+              scores: { select: { score: true, won: true, player: { select: { id: true } } } },
             },
           },
         },
@@ -73,7 +72,7 @@ export async function findPlayedGames(id: number) {
   };
   const games = new Map<number, Entry>();
 
-  for (const { score, play } of player.scores) {
+  for (const { play } of player.scores) {
     const entry = games.get(play.boardGame.id) ?? {
       boardGame: play.boardGame,
       plays: 0,
@@ -81,7 +80,7 @@ export async function findPlayedGames(id: number) {
       lastPlayedAt: play.gameNight.date,
     };
     entry.plays++;
-    if (score === winningScore(play.scores.map((s) => s.score), play.boardGame.scoringMode)) entry.wins++;
+    if (winnerIds(toResults(play.scores), play.boardGame.scoringMode).has(id)) entry.wins++;
     if (play.gameNight.date > entry.lastPlayedAt) entry.lastPlayedAt = play.gameNight.date;
     games.set(play.boardGame.id, entry);
   }
@@ -91,22 +90,23 @@ export async function findPlayedGames(id: number) {
 
 export type LeaderboardEntry = { player: Player; plays: number; wins: number; winRate: number };
 
-/** Plays and wins of every player who played at least once, best first. */
+/** Plays and wins of every player in competitive games (cooperative ones are left out), best first. */
 export async function findLeaderboard(): Promise<LeaderboardEntry[]> {
   const plays = await prisma.play.findMany({
+    where: { boardGame: { scoringMode: { not: 'COOPERATIVE' } } },
     select: {
       boardGame: { select: { scoringMode: true } },
-      scores: { select: { score: true, player: true } },
+      scores: { select: { score: true, won: true, player: true } },
     },
   });
 
   const byPlayer = new Map<number, LeaderboardEntry>();
   for (const play of plays) {
-    const best = winningScore(play.scores.map((s) => s.score), play.boardGame.scoringMode);
-    for (const { player, score } of play.scores) {
+    const winners = winnerIds(toResults(play.scores), play.boardGame.scoringMode);
+    for (const { player } of play.scores) {
       const entry = byPlayer.get(player.id) ?? { player, plays: 0, wins: 0, winRate: 0 };
       entry.plays++;
-      if (score === best) entry.wins++;
+      if (winners.has(player.id)) entry.wins++;
       byPlayer.set(player.id, entry);
     }
   }
@@ -120,28 +120,29 @@ export async function findLeaderboard(): Promise<LeaderboardEntry[]> {
 
 export type Rival = { opponent: Player; plays: number; wins: number; losses: number; ties: number };
 
-/** Head-to-head record against each opponent met in a play: who finished ahead of whom. */
+/** Head-to-head record against each opponent met in a competitive play: who finished ahead of whom. */
 export async function findRivals(id: number): Promise<Rival[]> {
   if (!(await findPlayerById(id))) {
     throw new HttpError(404, 'Player not found for id ' + id);
   }
 
   const plays = await prisma.play.findMany({
-    where: { scores: { some: { playerId: id } } },
+    where: { scores: { some: { playerId: id } }, boardGame: { scoringMode: { not: 'COOPERATIVE' } } },
     select: {
       boardGame: { select: { scoringMode: true } },
-      scores: { select: { score: true, player: true } },
+      scores: { select: { score: true, won: true, player: true } },
     },
   });
 
   const rivals = new Map<number, Rival>();
   for (const play of plays) {
-    const mine = play.scores.find((s) => s.player.id === id)!.score;
-    for (const { player, score } of play.scores) {
+    const results = toResults(play.scores);
+    const mine = results.find((r) => r.playerId === id)!;
+    for (const [i, { player }] of play.scores.entries()) {
       if (player.id === id) continue;
       const rival = rivals.get(player.id) ?? { opponent: player, plays: 0, wins: 0, losses: 0, ties: 0 };
       rival.plays++;
-      const result = compareScores(mine, score, play.boardGame.scoringMode);
+      const result = compareResults(mine, results[i], play.boardGame.scoringMode);
       if (result > 0) rival.wins++;
       else if (result < 0) rival.losses++;
       else rival.ties++;

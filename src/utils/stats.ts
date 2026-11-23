@@ -1,9 +1,15 @@
 import type { Play, Player } from '../api/types';
+import { isCompetitive, usesScores } from './scoring';
 
-/** Ids of the players with the best score (several in case of a tie), highest or lowest depending on the game. */
+/**
+ * Ids of the players who won: best score for scored games (all tied players, highest or lowest
+ * depending on the game), players marked as winners otherwise (the whole team in a won cooperative game).
+ */
 export function winnersOf(play: Play): number[] {
-  if (play.scores.length === 0) return [];
-  const values = play.scores.map((s) => s.score);
+  if (!usesScores(play.boardGame.scoringMode)) return play.scores.filter((s) => s.won).map((s) => s.player.id);
+
+  const values = play.scores.map((s) => s.score).filter((score) => score !== null);
+  if (values.length === 0) return [];
   const best = play.boardGame.scoringMode === 'LOWEST_WINS' ? Math.min(...values) : Math.max(...values);
   return play.scores.filter((s) => s.score === best).map((s) => s.player.id);
 }
@@ -14,11 +20,12 @@ export type PlayerStanding = {
   plays: number;
 };
 
-/** Wins and plays per player, best first (wins, then win rate, then name). */
+/** Wins and plays per player in competitive games (cooperative ones are left out), best first. */
 export function standings(plays: Play[]): PlayerStanding[] {
   const byPlayer = new Map<number, PlayerStanding>();
 
   for (const play of plays) {
+    if (!isCompetitive(play.boardGame.scoringMode)) continue;
     const winners = new Set(winnersOf(play));
     for (const { player } of play.scores) {
       const entry = byPlayer.get(player.id) ?? { player, wins: 0, plays: 0 };

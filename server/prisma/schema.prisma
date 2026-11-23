@@ -69,9 +69,10 @@ model Play {
 model PlayScore {
   playId   Int
   playerId Int
-  score    Int
-  play     Play   @relation(fields: [playId], references: [id], onDelete: Cascade)
-  player   Player @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  score    Int? // null for games without scores (winner only, cooperative)
+  won      Boolean @default(false) // set by hand for winner-only and cooperative games
+  play     Play    @relation(fields: [playId], references: [id], onDelete: Cascade)
+  player   Player  @relation(fields: [playerId], references: [id], onDelete: Restrict)
 
   @@id([playId, playerId])
 }
@@ -92,4 +93,6 @@ model Rating {
 enum ScoringMode {
   HIGHEST_WINS
   LOWEST_WINS
+  WINNER_ONLY // no score: the winners are picked by hand
+  COOPERATIVE // the whole team wins or loses together
 }
